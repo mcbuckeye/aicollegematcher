@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy: #1E3A5F;
+  --color-navy-light: #2A4F7F;
+  --color-navy-dark: #142841;
+  --color-gold: #D4A843;
+  --color-gold-light: #E8C56D;
+  --color-gold-dark: #B8902E;
+  --color-cream: #FDF8F0;
+  --color-warm-gray: #F5F1EB;
+  --color-text: #2D3748;
+  --color-text-light: #6B7280;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-serif: 'Merriweather', Georgia, serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: white;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); opacity: 0.5; }
+  50% { transform: scale(1.05); opacity: 0.3; }
+  100% { transform: scale(0.95); opacity: 0.5; }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-ring {
+  animation: pulse-ring 3s ease-in-out infinite;
+}
+
+.hero-grid {
+  background-image:
+    linear-gradient(rgba(30, 58, 95, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(30, 58, 95, 0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
