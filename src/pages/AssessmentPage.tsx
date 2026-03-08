@@ -447,7 +447,7 @@ function ResultsScreen({
   }
 
   function shareResults() {
-    const text = `I scored ${result.readinessScore}/100 on the AI College Matcher readiness assessment! Find your score:`
+    const text = `I scored ${result.readiness_score}/100 on the AI College Matcher readiness assessment! Find your score:`
     const url = window.location.origin
     if (navigator.share) {
       navigator.share({ title: 'My College Readiness Score', text, url }).catch(() => {})
@@ -507,7 +507,7 @@ function ResultsScreen({
           </h1>
           <p className="text-text-light mb-8">Based on your responses, here's where you stand.</p>
           <div className="flex justify-center mb-6">
-            <ScoreGauge score={result.readinessScore} size={200} />
+            <ScoreGauge score={result.readiness_score} size={200} />
           </div>
           <motion.p
             initial={{ opacity: 0 }}
@@ -546,7 +546,7 @@ function ResultsScreen({
               Areas to Strengthen
             </h3>
             <ul className="space-y-2">
-              {result.areasToImprove.map(a => (
+              {result.areas_to_improve.map((a: string) => (
                 <li key={a} className="text-sm text-text-light flex items-start gap-2">
                   <ArrowRight className="w-3.5 h-3.5 text-amber-400 mt-0.5 shrink-0" />
                   {a}
@@ -565,7 +565,7 @@ function ResultsScreen({
         >
           <h2 className="font-serif text-xl font-bold text-navy mb-6">Your Top 3 Matches</h2>
           <div className="space-y-4">
-            {result.topMatches.map((match, i) => (
+            {result.top_matches.map((match: any, i: number) => (
               <SchoolCard key={match.school.name} match={match} index={i} getCategoryLabel={getCategoryLabel} getCategoryColor={getCategoryColor} />
             ))}
           </div>
@@ -681,20 +681,20 @@ function SchoolCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-1">
             <h3 className="font-bold text-navy">{match.school.name}</h3>
-            <span className="text-sm font-bold text-gold whitespace-nowrap">{match.matchScore}% match</span>
+            <span className="text-sm font-bold text-gold whitespace-nowrap">{match.match_score}% match</span>
           </div>
           <div className="flex items-center gap-3 text-xs text-text-light mb-2">
             <span className="flex items-center gap-1">
               <MapPin className="w-3 h-3" />
-              {match.school.location}
+              {match.school.city}, {match.school.state}
             </span>
             <span className="flex items-center gap-1">
               <Users className="w-3 h-3" />
-              {match.school.enrollment.toLocaleString()} students
+              {(match.school.enrollment || 0).toLocaleString()} students
             </span>
             <span className="flex items-center gap-1">
               <DollarSign className="w-3 h-3" />
-              {Math.round(match.school.tuition / 1000)}k/yr
+              {Math.round((match.school.tuition || 0) / 1000)}k/yr
             </span>
           </div>
           <p className="text-sm text-text-light">{match.reason}</p>

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { listSchools, type School } from '../services/api';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
