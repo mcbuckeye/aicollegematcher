@@ -127,6 +127,7 @@ export async function submitAssessment(answers: Record<string, unknown>): Promis
     budget: answers.budget,
     must_haves: answers.mustHaves,
     biggest_worry: answers.biggestWorry,
+    email: answers.email,
   }
   
   const response = await fetch(`${API_BASE_URL}/assessment/match`, {

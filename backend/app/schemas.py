@@ -65,6 +65,7 @@ class AssessmentRequest(BaseModel):
     budget: Optional[str] = None
     must_haves: List[str] = []
     biggest_worry: Optional[str] = None
+    email: Optional[str] = None
 
 
 class AssessmentResult(BaseModel):

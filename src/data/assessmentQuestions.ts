@@ -153,4 +153,11 @@ export const questions: Question[] = [
     type: 'text',
     placeholder: 'e.g., "I\'m worried about affording it" or "I\'m not sure I\'ll get into the schools I want"',
   },
+  {
+    id: 'email',
+    title: "What's your email address?",
+    subtitle: "We'll send your detailed results and personalized college recommendations",
+    type: 'text',
+    placeholder: 'you@example.com',
+  },
 ]

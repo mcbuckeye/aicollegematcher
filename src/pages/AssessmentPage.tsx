@@ -60,6 +60,11 @@ export default function AssessmentPage() {
       try {
         const result = await submitAssessment(answers)
         setResult(result)
+        // Pre-fill and auto-submit email if provided in questionnaire
+        if (answers.email) {
+          setResultEmail(answers.email as string)
+          setEmailSubmitted(true)
+        }
       } catch (error) {
         console.error('Failed to submit assessment:', error)
         // Optionally show an error message to the user

@@ -1,8 +1,11 @@
+import logging
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from .. import schemas
 from ..database import get_db
 from ..services.matching import generate_results
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/assessment", tags=["assessment"])
 
@@ -62,6 +65,10 @@ def match_schools(
             "description": school.description,
         }
         school_dicts.append(school_dict)
+    
+    # Log email for lead capture
+    if assessment.email:
+        logger.info(f"[LEAD] Assessment submitted by: {assessment.email}")
     
     # Convert assessment to dict
     assessment_dict = assessment.model_dump()
