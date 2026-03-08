@@ -6,6 +6,12 @@ from typing import List, Dict, Any, Optional, Literal
 import random
 
 
+def _get(d: Dict[str, Any], key: str, default: Any = None) -> Any:
+    """Like dict.get but also returns default when value is None."""
+    v = d.get(key, default)
+    return default if v is None else v
+
+
 GpaRange = Literal['3.8-4.0', '3.5-3.79', '3.0-3.49', '2.5-2.99', 'below-2.5', 'unknown']
 TestScore = Literal['sat-1400+', 'sat-1200-1399', 'sat-1000-1199', 'sat-below-1000', 
                      'act-30+', 'act-24-29', 'act-below-24', 'not-yet', 'test-optional']
@@ -127,7 +133,7 @@ def score_academic_fit(school: Dict[str, Any], gpa: Optional[GpaRange],
                        test_scores: Optional[TestScore]) -> float:
     """Score academic fit based on GPA and test scores"""
     student_gpa = student_gpa_midpoint(gpa)
-    school_gpa = school.get('avg_gpa', 3.0)
+    school_gpa = _get(school, 'avg_gpa', 3.0)
     gpa_diff = student_gpa - school_gpa
 
     # GPA score
@@ -142,8 +148,8 @@ def score_academic_fit(school: Dict[str, Any], gpa: Optional[GpaRange],
     student_sat = student_sat_estimate(test_scores)
     test_score = 70
     if student_sat is not None:
-        sat_low = school.get('sat_range_low', 1000)
-        sat_high = school.get('sat_range_high', 1200)
+        sat_low = _get(school, 'sat_range_low', 1000)
+        sat_high = _get(school, 'sat_range_high', 1200)
         school_sat_mid = (sat_low + sat_high) / 2
         sat_diff = student_sat - school_sat_mid
         
@@ -162,11 +168,11 @@ def score_size_fit(school: Dict[str, Any], school_size: Optional[SchoolSize]) ->
     if not school_size or school_size == 'no-preference':
         return 80
     
-    if school.get('size') == school_size:
+    if _get(school, 'size') == school_size:
         return 100
     
     size_order = {'small': 0, 'medium': 1, 'large': 2}
-    school_size_val = size_order.get(school.get('size', 'medium'), 1)
+    school_size_val = size_order.get(_get(school, 'size', 'medium'), 1)
     pref_size_val = size_order.get(school_size, 1)
     diff = abs(school_size_val - pref_size_val)
     
@@ -179,8 +185,8 @@ def score_budget_fit(school: Dict[str, Any], budget: Optional[Budget]) -> float:
     if max_budget is None:
         return 70
     
-    tuition = school.get('tuition', 0)
-    fin_aid = school.get('avg_financial_aid', 0)
+    tuition = _get(school, 'tuition', 0)
+    fin_aid = _get(school, 'avg_financial_aid', 0)
     net_cost = tuition - fin_aid
     
     if net_cost <= max_budget:
@@ -201,7 +207,7 @@ def score_features_fit(school: Dict[str, Any], must_haves: List[Feature]) -> flo
     if not must_haves:
         return 75
     
-    school_features = school.get('features', [])
+    school_features = _get(school, 'features', [])
     matches = sum(1 for feature in must_haves if feature in school_features)
     return round((matches / len(must_haves)) * 100)
 
@@ -220,7 +226,7 @@ def score_priority_alignment(school: Dict[str, Any], priorities: List[Priority])
         dim_score = 50
 
         if priority == 'academics':
-            grad_rate = school.get('graduation_rate', 0)
+            grad_rate = _get(school, 'graduation_rate', 0)
             if grad_rate >= 90:
                 dim_score = 100
             elif grad_rate >= 80:
@@ -231,8 +237,8 @@ def score_priority_alignment(school: Dict[str, Any], priorities: List[Priority])
                 dim_score = 30
         
         elif priority == 'cost':
-            tuition = school.get('tuition', 0)
-            fin_aid = school.get('avg_financial_aid', 0)
+            tuition = _get(school, 'tuition', 0)
+            fin_aid = _get(school, 'avg_financial_aid', 0)
             net_cost = tuition - fin_aid
             if net_cost < 15000:
                 dim_score = 100
@@ -246,14 +252,14 @@ def score_priority_alignment(school: Dict[str, Any], priorities: List[Priority])
                 dim_score = 15
         
         elif priority == 'campus':
-            features = school.get('features', [])
+            features = _get(school, 'features', [])
             if 'd1-sports' in features or 'greek-life' in features:
                 dim_score = 90
             else:
                 dim_score = 50
         
         elif priority == 'location':
-            setting = school.get('setting', '')
+            setting = _get(school, 'setting', '')
             if setting == 'urban':
                 dim_score = 85
             elif setting == 'suburban':
@@ -262,7 +268,7 @@ def score_priority_alignment(school: Dict[str, Any], priorities: List[Priority])
                 dim_score = 55
         
         elif priority == 'outcomes':
-            earnings = school.get('median_earnings_10yr', 0)
+            earnings = _get(school, 'median_earnings_10yr', 0)
             if earnings >= 75000:
                 dim_score = 100
             elif earnings >= 60000:
@@ -283,7 +289,7 @@ def score_major_fit(school: Dict[str, Any], major: Optional[str]) -> float:
         return 60
 
     major_lower = major.lower()
-    majors_strength = school.get('majors_strength', [])
+    majors_strength = _get(school, 'majors_strength', [])
 
     # Exact match
     for m in majors_strength:
@@ -313,12 +319,12 @@ def is_student_below_range(school: Dict[str, Any], gpa: Optional[GpaRange],
     student_gpa = student_gpa_midpoint(gpa)
     student_sat = student_sat_estimate(test_scores)
 
-    school_gpa = school.get('avg_gpa', 3.0)
+    school_gpa = _get(school, 'avg_gpa', 3.0)
     gpa_below_range = student_gpa < school_gpa - 0.3
 
     sat_below_range = False
     if student_sat is not None:
-        sat_low = school.get('sat_range_low', 1000)
+        sat_low = _get(school, 'sat_range_low', 1000)
         sat_below_range = student_sat < sat_low - 50
 
     return gpa_below_range or sat_below_range
@@ -357,7 +363,7 @@ def categorize_match(match_score: int, school: Dict[str, Any],
     if match_score > 70:
         return 'strong-match'
     
-    acceptance_rate = school.get('acceptance_rate', 100)
+    acceptance_rate = _get(school, 'acceptance_rate', 100)
     if acceptance_rate > 40:
         return 'hidden-gem'
 
@@ -371,7 +377,7 @@ def generate_reason(school: Dict[str, Any], a: ParsedAnswers) -> str:
     # Major match
     if a.major:
         major_lower = a.major.lower()
-        majors_strength = school.get('majors_strength', [])
+        majors_strength = _get(school, 'majors_strength', [])
         has_major_match = any(
             major_lower in m.lower() or m.lower() in major_lower
             for m in majors_strength
@@ -382,8 +388,8 @@ def generate_reason(school: Dict[str, Any], a: ParsedAnswers) -> str:
     # Budget fit
     max_budget = budget_max(a.budget)
     if max_budget is not None:
-        tuition = school.get('tuition', 0)
-        fin_aid = school.get('avg_financial_aid', 0)
+        tuition = _get(school, 'tuition', 0)
+        fin_aid = _get(school, 'avg_financial_aid', 0)
         net_cost = tuition - fin_aid
         if net_cost <= max_budget:
             reasons.append('fits within your budget with financial aid')
@@ -401,7 +407,7 @@ def generate_reason(school: Dict[str, Any], a: ParsedAnswers) -> str:
         'study-abroad': 'study abroad options',
         'honors': 'honors program',
     }
-    school_features = school.get('features', [])
+    school_features = _get(school, 'features', [])
     matched_features = [
         feature_labels[f] for f in a.must_haves 
         if f in school_features and f in feature_labels
@@ -410,29 +416,29 @@ def generate_reason(school: Dict[str, Any], a: ParsedAnswers) -> str:
         reasons.append(' and '.join(matched_features[:2]))
 
     # Size preference
-    if a.school_size and a.school_size != 'no-preference' and school.get('size') == a.school_size:
+    if a.school_size and a.school_size != 'no-preference' and _get(school, 'size') == a.school_size:
         size_label = {
             'small': 'small, close-knit',
             'medium': 'mid-sized',
             'large': 'large, vibrant'
-        }.get(school.get('size', 'medium'), 'mid-sized')
+        }.get(_get(school, 'size', 'medium'), 'mid-sized')
         reasons.append(f"the {size_label} campus you prefer")
 
     # Top priority
     if a.priorities:
         top_priority = a.priorities[0]
-        if top_priority == 'outcomes' and school.get('median_earnings_10yr', 0) >= 65000:
+        if top_priority == 'outcomes' and _get(school, 'median_earnings_10yr', 0) >= 65000:
             reasons.append('excellent career outcomes')
-        elif top_priority == 'academics' and school.get('graduation_rate', 0) >= 88:
+        elif top_priority == 'academics' and _get(school, 'graduation_rate', 0) >= 88:
             reasons.append('top-tier academic quality')
         elif top_priority == 'cost':
-            tuition = school.get('tuition', 0)
-            fin_aid = school.get('avg_financial_aid', 0)
+            tuition = _get(school, 'tuition', 0)
+            fin_aid = _get(school, 'avg_financial_aid', 0)
             if (tuition - fin_aid) < 25000:
                 reasons.append('great value for your investment')
 
     if not reasons:
-        return school.get('description', 'A great match for you')
+        return _get(school, 'description', 'A great match for you')
 
     return f"Matches you with {', '.join(reasons[:3])}."
 
