@@ -2,7 +2,9 @@
  * API client for backend communication
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8002/api'
+const API_BASE_URL = import.meta.env.VITE_API_URL || (
+  import.meta.env.PROD ? '/api' : 'http://localhost:8002/api'
+)
 
 export interface School {
   id: number

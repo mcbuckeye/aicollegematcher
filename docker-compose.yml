@@ -1,0 +1,57 @@
+services:
+  aicollegematcher-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: aicollegematcher
+      POSTGRES_USER: aicollegematcher
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-aicollegematcher2026}
+    volumes:
+      - aicollegematcher-pgdata:/var/lib/postgresql/data
+    networks:
+      - dokploy-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aicollegematcher"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  aicollegematcher-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://aicollegematcher:${DB_PASSWORD:-aicollegematcher2026}@aicollegematcher-db:5432/aicollegematcher
+      SCORECARD_API_KEY: ${SCORECARD_API_KEY:-DEMO_KEY}
+    depends_on:
+      aicollegematcher-db:
+        condition: service_healthy
+    networks:
+      - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.aicollegematcher-api.rule=Host(`aicollegematcher.machomelab.com`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.aicollegematcher-api.entrypoints=web"
+      - "traefik.http.services.aicollegematcher-api.loadbalancer.server.port=8000"
+      - "traefik.http.routers.aicollegematcher-api.priority=10"
+
+  aicollegematcher-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - aicollegematcher-api
+    networks:
+      - dokploy-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.aicollegematcher-web.rule=Host(`aicollegematcher.machomelab.com`)"
+      - "traefik.http.routers.aicollegematcher-web.entrypoints=web"
+      - "traefik.http.services.aicollegematcher-web.loadbalancer.server.port=80"
+      - "traefik.http.routers.aicollegematcher-web.priority=1"
+
+volumes:
+  aicollegematcher-pgdata:
+
+networks:
+  dokploy-network:
+    external: true
