@@ -34,7 +34,7 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-8">
             <a href="#how-it-works" className="text-sm text-text-light hover:text-navy transition-colors no-underline">How It Works</a>
             <a href="#features" className="text-sm text-text-light hover:text-navy transition-colors no-underline">Features</a>
-            <a href="#pricing" className="text-sm text-text-light hover:text-navy transition-colors no-underline">Pricing</a>
+            <Link to="/schools" className="text-sm text-text-light hover:text-navy transition-colors no-underline">Browse Schools</Link>
             <Link
               to="/assess"
               className="bg-gradient-to-r from-gold to-gold-dark hover:from-gold-dark hover:to-gold text-white font-semibold text-sm px-5 py-2.5 rounded-lg transition-all no-underline shadow-sm hover:shadow-md"
@@ -45,12 +45,13 @@ export default function Navbar() {
         )}
 
         {!isHome && (
-          <div className="hidden md:flex items-center">
+          <div className="hidden md:flex items-center gap-4">
+            <Link to="/schools" className="text-sm text-text-light hover:text-navy transition-colors no-underline">Browse Schools</Link>
             <Link
               to="/"
               className="text-sm text-text-light hover:text-navy transition-colors no-underline"
             >
-              Back to Home
+              Home
             </Link>
           </div>
         )}
@@ -79,9 +80,9 @@ export default function Navbar() {
                 <>
                   <a href="#how-it-works" onClick={() => setOpen(false)} className="text-text-light hover:text-navy transition-colors no-underline">How It Works</a>
                   <a href="#features" onClick={() => setOpen(false)} className="text-text-light hover:text-navy transition-colors no-underline">Features</a>
-                  <a href="#pricing" onClick={() => setOpen(false)} className="text-text-light hover:text-navy transition-colors no-underline">Pricing</a>
                 </>
               )}
+              <Link to="/schools" onClick={() => setOpen(false)} className="text-text-light hover:text-navy transition-colors no-underline">Browse Schools</Link>
               <Link
                 to={isHome ? '/assess' : '/'}
                 onClick={() => setOpen(false)}

@@ -19,7 +19,7 @@ import {
 } from 'lucide-react'
 import { questions, type Question } from '../data/assessmentQuestions'
 import { MAJORS } from '../data/majors'
-import { generateResults, type AssessmentResult, type SchoolMatch } from '../data/matchingEngine'
+import { submitAssessment, type AssessmentResult, type SchoolMatch } from '../services/api'
 import ScoreGauge from '../components/ScoreGauge'
 
 const slideVariants = {
@@ -53,10 +53,16 @@ export default function AssessmentPage() {
     return true
   }
 
-  function next() {
+  async function next() {
     if (!canAdvance()) return
     if (isLast) {
-      setResult(generateResults(answers))
+      try {
+        const result = await submitAssessment(answers)
+        setResult(result)
+      } catch (error) {
+        console.error('Failed to submit assessment:', error)
+        // Optionally show an error message to the user
+      }
     } else {
       setDir(1)
       setStep(s => s + 1)
