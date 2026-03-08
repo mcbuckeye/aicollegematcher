@@ -60,6 +60,7 @@ class AssessmentRequest(BaseModel):
     major: Optional[str] = None
     school_size: Optional[str] = None
     distance: Optional[str] = None
+    zip_code: Optional[str] = None
     priorities: List[str] = []
     budget: Optional[str] = None
     must_haves: List[str] = []

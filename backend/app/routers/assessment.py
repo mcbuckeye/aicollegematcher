@@ -57,6 +57,8 @@ def match_schools(
             "religious_affiliation": school.religious_affiliation,
             "features": school.features or [],
             "majors_strength": school.majors_strength or [],
+            "latitude": school.latitude,
+            "longitude": school.longitude,
             "description": school.description,
         }
         school_dicts.append(school_dict)

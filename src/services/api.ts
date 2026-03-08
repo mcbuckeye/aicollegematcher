@@ -122,6 +122,7 @@ export async function submitAssessment(answers: Record<string, unknown>): Promis
     major: answers.major,
     school_size: answers.schoolSize,
     distance: answers.distance,
+    zip_code: answers.zipCode,
     priorities: answers.priorities,
     budget: answers.budget,
     must_haves: answers.mustHaves,

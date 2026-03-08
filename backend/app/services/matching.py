@@ -3,7 +3,10 @@ Matching engine ported from TypeScript matchingEngine.ts
 Scores schools based on student assessment responses
 """
 from typing import List, Dict, Any, Optional, Literal
+import math
 import random
+
+import pgeocode
 
 
 def _get(d: Dict[str, Any], key: str, default: Any = None) -> Any:
@@ -35,6 +38,7 @@ class ParsedAnswers:
         self.budget: Optional[Budget] = answers.get('budget')
         self.must_haves: List[Feature] = answers.get('must_haves', []) or answers.get('mustHaves', [])
         self.biggest_worry: Optional[str] = answers.get('biggest_worry') or answers.get('biggestWorry')
+        self.zip_code: Optional[str] = answers.get('zip_code') or answers.get('zipCode')
 
 
 def calculate_readiness_score(a: ParsedAnswers) -> int:
@@ -283,6 +287,68 @@ def score_priority_alignment(school: Dict[str, Any], priorities: List[Priority])
     return round(score / total_weight)
 
 
+_nomi = pgeocode.Nominatim('us')
+
+
+def zip_to_coords(zip_code: str) -> Optional[tuple]:
+    """Convert US zip code to (latitude, longitude) using pgeocode."""
+    result = _nomi.query_postal_code(zip_code)
+    if result is not None and not math.isnan(result.latitude):
+        return (result.latitude, result.longitude)
+    return None
+
+
+def _haversine_miles(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Calculate distance in miles between two lat/lng points."""
+    R = 3958.8  # Earth radius in miles
+    lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+    return R * 2 * math.asin(math.sqrt(a))
+
+
+def score_distance(school: Dict[str, Any], a: 'ParsedAnswers') -> float:
+    """Score distance fit based on student zip code and distance preference."""
+    if not a.zip_code:
+        return 70  # neutral if no zip provided
+
+    student_coords = zip_to_coords(a.zip_code)
+    if student_coords is None:
+        return 70
+
+    school_lat = _get(school, 'latitude')
+    school_lon = _get(school, 'longitude')
+    if school_lat is None or school_lon is None:
+        return 70
+
+    miles = _haversine_miles(student_coords[0], student_coords[1], school_lat, school_lon)
+    pref = a.distance
+
+    if pref == 'commute':
+        if miles < 50:
+            return 100
+        elif miles < 100:
+            return 60
+        else:
+            return 20
+    elif pref == 'nearby':
+        if miles < 200:
+            return 100
+        elif miles < 400:
+            return 70
+        else:
+            return 30
+    elif pref == 'anywhere':
+        # Slight bonus for closer schools, but always 80+
+        return max(80, round(100 - miles / 100))
+    elif pref == 'international':
+        return 70
+    else:
+        # No distance preference set
+        return 70
+
+
 def score_major_fit(school: Dict[str, Any], major: Optional[str]) -> float:
     """Score major program strength match"""
     if not major or len(major) == 0:
@@ -338,14 +404,16 @@ def compute_school_match_score(school: Dict[str, Any], a: ParsedAnswers) -> int:
     features = score_features_fit(school, a.must_haves)
     priority = score_priority_alignment(school, a.priorities)
     major = score_major_fit(school, a.major)
+    dist = score_distance(school, a)
 
     weighted = (
-        academic * 0.30 +
-        size * 0.15 +
+        academic * 0.25 +
+        size * 0.10 +
         budget * 0.20 +
-        features * 0.15 +
+        features * 0.10 +
         priority * 0.10 +
-        major * 0.10
+        major * 0.10 +
+        dist * 0.15
     )
 
     return round(min(100, max(0, weighted)))

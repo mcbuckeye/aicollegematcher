@@ -96,6 +96,13 @@ export const questions: Question[] = [
     ],
   },
   {
+    id: 'zipCode',
+    title: 'What is your zip code?',
+    subtitle: 'Used to calculate distances to schools',
+    type: 'text',
+    placeholder: '12345',
+  },
+  {
     id: 'priorities',
     title: 'What matters most to you?',
     subtitle: 'Drag to rank from most to least important',

@@ -45,6 +45,7 @@ export default function AssessmentPage() {
   }
 
   function canAdvance() {
+    if (question.id === 'zipCode') return true  // zip code is optional
     const a = answers[question.id]
     if (!a) return false
     if (question.type === 'checkbox') return (a as string[]).length > 0

@@ -30,6 +30,7 @@ class ScorecardClient:
         "latest.student.retention_rate.four_year.full_time_pooled",
         "latest.earnings.10_yrs_after_entry.median",
         "latest.student.student_faculty_ratio",
+        "location.lat", "location.lon",
     ]
 
     REGIONS = {
@@ -176,6 +177,9 @@ class ScorecardClient:
         else:
             avg_gpa = 3.2
 
+        lat = g("location.lat")
+        lon = g("location.lon")
+
         return {
             "scorecard_id": g("id"),
             "name": name,
@@ -202,6 +206,8 @@ class ScorecardClient:
             "hbcu": hbcu,
             "religious_affiliation": religious,
             "features": list(set(features)),
+            "latitude": lat,
+            "longitude": lon,
             "majors_strength": [],
             "description": f"{name} is a {school_type} {size} {setting} institution in {city}, {state}.",
         }

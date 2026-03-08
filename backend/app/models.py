@@ -28,6 +28,8 @@ class School(Base):
     retention_rate = Column(Integer)
     median_earnings_10yr = Column(Integer)
     student_faculty_ratio = Column(Integer)
+    latitude = Column(Float)
+    longitude = Column(Float)
     region = Column(String(20))
     hbcu = Column(Boolean, default=False)
     religious_affiliation = Column(Boolean, default=False)
