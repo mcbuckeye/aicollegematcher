@@ -29,7 +29,7 @@ services:
       - dokploy-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.aicollegematcher-api.rule=Host(`aicollegematcher.machomelab.com`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.aicollegematcher-api.rule=(Host(`aicollegematcher.machomelab.com`) || Host(`aicollegematcher.com`) || Host(`www.aicollegematcher.com`)) && PathPrefix(`/api`)"
       - "traefik.http.routers.aicollegematcher-api.entrypoints=web"
       - "traefik.http.services.aicollegematcher-api.loadbalancer.server.port=8000"
       - "traefik.http.routers.aicollegematcher-api.priority=10"
@@ -44,7 +44,7 @@ services:
       - dokploy-network
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.aicollegematcher-web.rule=Host(`aicollegematcher.machomelab.com`)"
+      - "traefik.http.routers.aicollegematcher-web.rule=Host(`aicollegematcher.machomelab.com`) || Host(`aicollegematcher.com`) || Host(`www.aicollegematcher.com`)"
       - "traefik.http.routers.aicollegematcher-web.entrypoints=web"
       - "traefik.http.services.aicollegematcher-web.loadbalancer.server.port=80"
       - "traefik.http.routers.aicollegematcher-web.priority=1"
