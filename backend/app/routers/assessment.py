@@ -66,10 +66,6 @@ def match_schools(
         }
         school_dicts.append(school_dict)
     
-    # Log email for lead capture
-    if assessment.email:
-        logger.info(f"[LEAD] Assessment submitted by: {assessment.email}")
-    
     # Convert assessment to dict
     assessment_dict = assessment.model_dump()
     
@@ -80,5 +76,30 @@ def match_schools(
     for match in results['top_matches']:
         school_id = match['school']['id']
         match['school'] = school_models_map[school_id]
+    
+    # Save lead to database
+    if assessment.email:
+        from ..models import Lead
+        top_names = [m['school'].name for m in results['top_matches'][:3]]
+        lead = Lead(
+            email=assessment.email,
+            zip_code=assessment.zip_code,
+            grade=assessment.grade,
+            gpa=assessment.gpa,
+            major=assessment.major,
+            biggest_worry=assessment.biggest_worry,
+            readiness_score=results['readiness_score'],
+            top_match_1=top_names[0] if len(top_names) > 0 else None,
+            top_match_2=top_names[1] if len(top_names) > 1 else None,
+            top_match_3=top_names[2] if len(top_names) > 2 else None,
+            answers=assessment_dict,
+        )
+        try:
+            db.add(lead)
+            db.commit()
+            logger.info(f"[LEAD] Saved: {assessment.email} (score: {results['readiness_score']})")
+        except Exception as e:
+            db.rollback()
+            logger.error(f"[LEAD] Failed to save lead {assessment.email}: {e}")
     
     return results

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, Text, ARRAY, DateTime
+from sqlalchemy import Column, Integer, String, Float, Boolean, Text, ARRAY, DateTime, JSON
 from sqlalchemy.sql import func
 from .database import Base
 
@@ -38,3 +38,21 @@ class School(Base):
     description = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class Lead(Base):
+    __tablename__ = "leads"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(255), nullable=False, index=True)
+    zip_code = Column(String(10))
+    grade = Column(String(20))
+    gpa = Column(String(20))
+    major = Column(String(255))
+    biggest_worry = Column(Text)
+    readiness_score = Column(Integer)
+    top_match_1 = Column(String(255))
+    top_match_2 = Column(String(255))
+    top_match_3 = Column(String(255))
+    answers = Column(JSON)  # full assessment payload for reference
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
