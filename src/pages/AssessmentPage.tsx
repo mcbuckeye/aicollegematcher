@@ -727,6 +727,36 @@ function ResultsScreen({
           )}
         </motion.div>
 
+        {/* AI Impact Callout */}
+        {typeof answers.major === 'string' && answers.major !== 'Undecided / Exploring' && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.65 }}
+            className="mt-6"
+          >
+            <Link
+              to={`/majors/${(answers.major as string).toLowerCase().replace(/ & /g, '-').replace(/ \/ /g, '-').replace(/ /g, '-')}`}
+              className="block bg-gradient-to-r from-gold/5 to-gold/10 rounded-2xl p-6 border border-gold/20 hover:shadow-md transition-all no-underline text-inherit"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-gold/10 rounded-xl flex items-center justify-center shrink-0">
+                  <TrendingUp className="w-6 h-6 text-gold" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-navy text-sm mb-1">
+                    See how {answers.major as string} is impacted by AI
+                  </h3>
+                  <p className="text-xs text-text-light">
+                    Explore AI disruption scores, salary data, and career outlook for your major.
+                  </p>
+                </div>
+                <ArrowRight className="w-5 h-5 text-gold shrink-0" />
+              </div>
+            </Link>
+          </motion.div>
+        )}
+
         {/* Chat with AI Advisor */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

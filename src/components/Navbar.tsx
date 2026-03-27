@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { GraduationCap, Menu, X, MessageCircle, FileText, DollarSign, GitCompareArrows, Target } from 'lucide-react'
+import { GraduationCap, Menu, X, MessageCircle, FileText, DollarSign, GitCompareArrows, Target, Microscope } from 'lucide-react'
 
 export default function Navbar() {
   const [open, setOpen] = useState(false)
@@ -35,6 +35,10 @@ export default function Navbar() {
             <a href="#how-it-works" className="text-sm text-text-light hover:text-navy transition-colors no-underline">How It Works</a>
             <a href="#features" className="text-sm text-text-light hover:text-navy transition-colors no-underline">Features</a>
             <Link to="/schools" className="text-sm text-text-light hover:text-navy transition-colors no-underline">Browse Schools</Link>
+            <Link to="/majors" className="text-sm text-text-light hover:text-navy transition-colors no-underline inline-flex items-center gap-1">
+              <Microscope className="w-3.5 h-3.5" />
+              Explore Majors
+            </Link>
             <Link to="/chat" className="text-sm text-text-light hover:text-navy transition-colors no-underline inline-flex items-center gap-1">
               <MessageCircle className="w-3.5 h-3.5" />
               AI Chat
@@ -59,6 +63,10 @@ export default function Navbar() {
         {!isHome && (
           <div className="hidden md:flex items-center gap-4">
             <Link to="/schools" className="text-sm text-text-light hover:text-navy transition-colors no-underline">Browse Schools</Link>
+            <Link to="/majors" className="text-sm text-text-light hover:text-navy transition-colors no-underline inline-flex items-center gap-1">
+              <Microscope className="w-3.5 h-3.5" />
+              Explore Majors
+            </Link>
             <Link to="/chat" className="text-sm text-text-light hover:text-navy transition-colors no-underline inline-flex items-center gap-1">
               <MessageCircle className="w-3.5 h-3.5" />
               AI Chat
@@ -115,6 +123,10 @@ export default function Navbar() {
                 </>
               )}
               <Link to="/schools" onClick={() => setOpen(false)} className="text-text-light hover:text-navy transition-colors no-underline">Browse Schools</Link>
+              <Link to="/majors" onClick={() => setOpen(false)} className="text-text-light hover:text-navy transition-colors no-underline flex items-center gap-1">
+                <Microscope className="w-3.5 h-3.5" />
+                Explore Majors
+              </Link>
               <Link to="/chat" onClick={() => setOpen(false)} className="text-text-light hover:text-navy transition-colors no-underline flex items-center gap-1">
                 <MessageCircle className="w-3.5 h-3.5" />
                 AI Chat

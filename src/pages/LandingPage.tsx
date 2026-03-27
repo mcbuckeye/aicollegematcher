@@ -411,6 +411,88 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Future-Proof Your Career */}
+      <section className="py-20 sm:py-28 px-4">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.05 }}
+            variants={fadeUp}
+            className="text-center mb-14"
+          >
+            <span className="text-xs font-bold text-gold uppercase tracking-widest mb-3 block">New Feature</span>
+            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-navy mb-4">
+              Future-Proof Your Career Choice
+            </h2>
+            <p className="text-text-light max-w-2xl mx-auto">
+              AI is reshaping every industry. Our Major Explorer shows you exactly how AI impacts 60+ career fields —
+              so you can pick a major that sets you up for success, not obsolescence.
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-6 mb-10">
+            {[
+              { name: 'Computer Science', score: 35, tier: 'Moderate', salary: '$124k', desc: 'AI automates coding tasks but creates massive demand for AI-literate engineers.' },
+              { name: 'Nursing', score: 12, tier: 'Low Risk', salary: '$81k', desc: 'Physical care and empathy are impossible to automate. One of the safest careers.' },
+              { name: 'Accounting', score: 72, tier: 'High Risk', salary: '$78k', desc: 'Routine bookkeeping is being automated, but advisory roles remain strong.' },
+            ].map((major, i) => {
+              const getColor = (s: number) => {
+                if (s <= 25) return { bg: 'bg-green-100', fill: 'bg-green-500', text: 'text-green-700', badge: 'bg-green-100 text-green-700' }
+                if (s <= 50) return { bg: 'bg-yellow-100', fill: 'bg-yellow-500', text: 'text-yellow-700', badge: 'bg-yellow-100 text-yellow-700' }
+                if (s <= 70) return { bg: 'bg-orange-100', fill: 'bg-orange-500', text: 'text-orange-700', badge: 'bg-orange-100 text-orange-700' }
+                return { bg: 'bg-red-100', fill: 'bg-red-500', text: 'text-red-700', badge: 'bg-red-100 text-red-700' }
+              }
+              const colors = getColor(major.score)
+              return (
+                <motion.div
+                  key={major.name}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.05 }}
+                  custom={i}
+                  variants={fadeUp}
+                  className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <h3 className="text-lg font-bold text-navy">{major.name}</h3>
+                    <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${colors.badge}`}>{major.tier}</span>
+                  </div>
+                  <div className="mb-3">
+                    <div className="flex items-center justify-between text-xs text-text-light mb-1">
+                      <span>AI Disruption Score</span>
+                      <span className={`font-bold ${colors.text}`}>{major.score}/100</span>
+                    </div>
+                    <div className={`${colors.bg} rounded-full h-2 overflow-hidden`}>
+                      <div className={`${colors.fill} h-2 rounded-full`} style={{ width: `${major.score}%` }} />
+                    </div>
+                  </div>
+                  <p className="text-sm text-text-light mb-3">{major.desc}</p>
+                  <div className="text-xs text-text-light">Median salary: <span className="font-bold text-navy">{major.salary}</span></div>
+                </motion.div>
+              )
+            })}
+          </div>
+
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.05 }}
+            custom={4}
+            variants={fadeUp}
+            className="text-center"
+          >
+            <Link
+              to="/majors"
+              className="group inline-flex items-center gap-2 bg-gradient-to-r from-gold to-gold-dark text-white font-semibold px-8 py-4 rounded-xl transition-all no-underline shadow-lg shadow-gold/20 hover:shadow-xl hover:-translate-y-0.5"
+            >
+              Explore All Majors
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Pricing */}
       <section id="pricing" className="py-20 sm:py-28 px-4">
         <div className="max-w-6xl mx-auto">

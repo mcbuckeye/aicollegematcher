@@ -247,6 +247,60 @@ export async function getPaymentStatus(email: string): Promise<{ tier: string; s
 }
 
 // Chat
+// Majors Explorer
+export interface MajorSummary {
+  name: string
+  slug: string
+  ai_disruption_score: number
+  ai_disruption_tier: string
+  ai_impact_summary: string
+  career_outlook: string
+  median_salary: number
+  growth_rate: string
+  ai_augmented_skills: string[]
+  ai_resistant_aspects: string[]
+  ai_threatened_aspects: string[]
+  recommended_complementary_skills: string[]
+  example_careers: string[]
+  category: string
+}
+
+export interface MajorDetail extends MajorSummary {
+  top_schools: {
+    id: number
+    name: string
+    city: string | null
+    state: string | null
+    graduation_rate: number | null
+    enrollment: number | null
+    tuition: number | null
+    type: string | null
+  }[]
+}
+
+export async function getMajorsExplorer(params: {
+  sort?: string
+  category?: string
+} = {}): Promise<{ majors: MajorSummary[]; total: number }> {
+  const queryParams = new URLSearchParams()
+  if (params.sort) queryParams.append('sort', params.sort)
+  if (params.category) queryParams.append('category', params.category)
+
+  const response = await fetch(`${API_BASE_URL}/majors/explorer?${queryParams}`)
+  if (!response.ok) {
+    throw new Error(`Failed to fetch majors: ${response.statusText}`)
+  }
+  return response.json()
+}
+
+export async function getMajorDetail(slug: string): Promise<MajorDetail> {
+  const response = await fetch(`${API_BASE_URL}/majors/${slug}/detail`)
+  if (!response.ok) {
+    throw new Error(`Failed to fetch major detail: ${response.statusText}`)
+  }
+  return response.json()
+}
+
 export async function sendChatMessage(payload: {
   message: string
   email?: string

@@ -12,6 +12,8 @@ import StrategyPage from './pages/StrategyPage'
 import ComparePage from './pages/ComparePage'
 import ParentDashboardPage from './pages/ParentDashboardPage'
 import DecisionPage from './pages/DecisionPage'
+import MajorExplorerPage from './pages/MajorExplorerPage'
+import MajorDetailPage from './pages/MajorDetailPage'
 
 export default function App() {
   return (
@@ -23,6 +25,8 @@ export default function App() {
             <Route path="/assess" element={<AssessmentPage />} />
             <Route path="/schools" element={<SchoolsPage />} />
             <Route path="/schools/:id" element={<SchoolDetailPage />} />
+            <Route path="/majors" element={<MajorExplorerPage />} />
+            <Route path="/majors/:slug" element={<MajorDetailPage />} />
             <Route path="/chat" element={<ChatPage />} />
             <Route path="/essay" element={<EssayPage />} />
             <Route path="/financial-aid" element={<FinancialAidPage />} />
