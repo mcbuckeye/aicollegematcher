@@ -18,6 +18,10 @@ import {
   DollarSign,
   Users,
   TrendingUp,
+  Copy,
+  Check,
+  Twitter,
+  Linkedin,
 } from 'lucide-react'
 import { questions, type Question } from '../data/assessmentQuestions'
 import { MAJORS } from '../data/majors'
@@ -480,6 +484,18 @@ function ResultsScreen({
   }
 
   const [pdfLoading, setPdfLoading] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  const topMatch = result.top_matches[0]
+  const shareText = `I just found my top college matches with AI College Matcher! 🎓 My #1 match is ${topMatch?.school?.name || 'amazing'} at ${topMatch?.match_score || 0}% — powered by real data from 2,000+ schools. Try it free: https://aicollegematcher.machomelab.com`
+
+  function handleCopyShare() {
+    navigator.clipboard.writeText(shareText).then(() => {
+      setCopied(true)
+      trackEvent('share_copy', { top_match: topMatch?.school?.name })
+      setTimeout(() => setCopied(false), 2000)
+    }).catch(() => {})
+  }
 
   async function handleDownloadPdf() {
     setPdfLoading(true)
@@ -494,14 +510,10 @@ function ResultsScreen({
   }
 
   function shareResults() {
-    const text = `I scored ${result.readiness_score}/100 on the AI College Matcher readiness assessment! Find your score:`
-    const url = window.location.origin
     if (navigator.share) {
-      navigator.share({ title: 'My College Readiness Score', text, url }).catch(() => {})
+      navigator.share({ title: 'My College Readiness Score', text: shareText, url: 'https://aicollegematcher.machomelab.com' }).catch(() => {})
     } else {
-      navigator.clipboard.writeText(`${text} ${url}`).then(() => {
-        alert('Link copied to clipboard!')
-      }).catch(() => {})
+      handleCopyShare()
     }
   }
 
@@ -795,21 +807,52 @@ function ResultsScreen({
           </Link>
         </motion.div>
 
-        {/* Social share + retake */}
+        {/* Share My Results */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+          className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 text-center mt-6"
+        >
+          <Share2 className="w-8 h-8 text-gold mx-auto mb-2" />
+          <h3 className="font-serif text-lg font-bold text-navy mb-1">Share My Results</h3>
+          <p className="text-sm text-text-light mb-5">Show friends and family your college matches!</p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button
+              onClick={handleCopyShare}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-navy/10 hover:bg-navy/20 text-navy font-semibold rounded-lg transition-all cursor-pointer border-0 text-sm w-full sm:w-auto justify-center"
+            >
+              {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+              {copied ? 'Copied!' : 'Copy Link'}
+            </button>
+            <a
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#1DA1F2]/10 hover:bg-[#1DA1F2]/20 text-[#1DA1F2] font-semibold rounded-lg transition-all text-sm no-underline w-full sm:w-auto justify-center"
+            >
+              <Twitter className="w-4 h-4" />
+              Share on X
+            </a>
+            <a
+              href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent('https://aicollegematcher.machomelab.com')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0A66C2]/10 hover:bg-[#0A66C2]/20 text-[#0A66C2] font-semibold rounded-lg transition-all text-sm no-underline w-full sm:w-auto justify-center"
+            >
+              <Linkedin className="w-4 h-4" />
+              Share on LinkedIn
+            </a>
+          </div>
+        </motion.div>
+
+        {/* Retake */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-          className="flex items-center justify-center gap-6 mt-8"
+          transition={{ delay: 0.85 }}
+          className="flex items-center justify-center mt-6"
         >
-          <button
-            onClick={shareResults}
-            className="inline-flex items-center gap-2 text-sm text-text-light hover:text-navy transition-colors bg-transparent border-0 cursor-pointer"
-          >
-            <Share2 className="w-4 h-4" />
-            Share Results
-          </button>
-          <span className="text-gray-300">|</span>
           <Link
             to="/assess"
             onClick={() => window.location.reload()}

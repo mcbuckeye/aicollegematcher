@@ -16,6 +16,7 @@ import MajorExplorerPage from './pages/MajorExplorerPage'
 import MajorDetailPage from './pages/MajorDetailPage'
 import AuthPage from './pages/AuthPage'
 import SavedSchoolsPage from './pages/SavedSchoolsPage'
+import AdminPage from './pages/AdminPage'
 
 export default function App() {
   return (
@@ -39,6 +40,7 @@ export default function App() {
             <Route path="/login" element={<AuthPage />} />
             <Route path="/register" element={<AuthPage />} />
             <Route path="/saved" element={<SavedSchoolsPage />} />
+            <Route path="/admin" element={<AdminPage />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

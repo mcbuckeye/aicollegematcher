@@ -16,7 +16,7 @@ function getSessionId(): string {
 }
 
 export async function trackEvent(
-  eventType: 'page_view' | 'quiz_start' | 'quiz_complete' | 'quiz_abandon' | 'pdf_download' | 'school_view',
+  eventType: 'page_view' | 'quiz_start' | 'quiz_complete' | 'quiz_abandon' | 'pdf_download' | 'school_view' | 'share_copy',
   eventData: Record<string, unknown> = {}
 ): Promise<void> {
   try {
