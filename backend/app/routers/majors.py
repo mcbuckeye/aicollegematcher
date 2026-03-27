@@ -46,20 +46,67 @@ def get_major_detail(major_slug: str):
 
     name, data = result
 
+    # Map major names to programs_offered JSONB keys
+    MAJOR_TO_PROGRAM_KEY = {
+        "computer science": "computer", "computer engineering": "computer",
+        "engineering": "engineering", "mechanical engineering": "engineering",
+        "civil engineering": "engineering", "chemical engineering": "engineering",
+        "electrical engineering": "engineering", "aerospace engineering": "engineering",
+        "biomedical engineering": "engineering", "industrial engineering": "engineering",
+        "biology": "biological", "biochemistry": "biological", "animal science": "biological",
+        "nursing": "health", "public health": "health", "pre-medicine": "health",
+        "kinesiology": "health", "nutrition": "health",
+        "business administration": "business_marketing", "marketing": "business_marketing",
+        "finance": "business_marketing", "accounting": "business_marketing",
+        "economics": "business_marketing", "entrepreneurship": "business_marketing",
+        "psychology": "psychology",
+        "education": "education", "special education": "education",
+        "english": "english", "creative writing": "english",
+        "history": "history",
+        "mathematics": "mathematics", "statistics": "mathematics",
+        "physics": "physical_science", "chemistry": "physical_science",
+        "environmental science": "physical_science",
+        "political science": "social_science", "sociology": "social_science",
+        "anthropology": "social_science", "international relations": "social_science",
+        "criminal justice": "security_law_enforcement", "pre-law": "security_law_enforcement",
+        "communications": "communication", "journalism": "communication",
+        "public relations": "communication",
+        "graphic design": "visual_performing", "film": "visual_performing",
+        "music": "visual_performing", "theater": "visual_performing",
+        "art history": "visual_performing", "fine arts": "visual_performing",
+        "photography": "visual_performing",
+        "architecture": "architecture",
+        "foreign languages": "language", "linguistics": "language",
+        "philosophy": "philosophy_religious", "religious studies": "philosophy_religious",
+        "agriculture": "agriculture", "natural resources": "resources",
+        "social work": "public_administration_social_service",
+    }
+    
+    program_key = MAJOR_TO_PROGRAM_KEY.get(name.lower())
+    
     # Query top schools that offer programs in this area
     top_schools = []
     try:
         db = SessionLocal()
-        # Search for schools with this major/program area
-        # programs_offered is a JSON column - search for relevant program keys
-        query = text("""
-            SELECT id, name, city, state, graduation_rate, enrollment, tuition, type
-            FROM schools
-            WHERE graduation_rate IS NOT NULL
-            ORDER BY graduation_rate DESC
-            LIMIT 10
-        """)
-        rows = db.execute(query).fetchall()
+        if program_key:
+            query = text("""
+                SELECT id, name, city, state, graduation_rate, enrollment, tuition, type
+                FROM schools
+                WHERE programs_offered ? :pkey
+                  AND graduation_rate IS NOT NULL
+                ORDER BY graduation_rate DESC
+                LIMIT 10
+            """)
+            rows = db.execute(query, {"pkey": program_key}).fetchall()
+        else:
+            query = text("""
+                SELECT id, name, city, state, graduation_rate, enrollment, tuition, type
+                FROM schools
+                WHERE graduation_rate IS NOT NULL
+                ORDER BY graduation_rate DESC
+                LIMIT 10
+            """)
+            rows = db.execute(query).fetchall()
         for row in rows:
             top_schools.append({
                 "id": row[0],
