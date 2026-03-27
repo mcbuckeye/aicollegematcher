@@ -399,6 +399,7 @@ export default function LandingPage() {
                 desc: 'See what we can do',
                 features: ['Assessment quiz', 'Top 3 school preview', '3 AI messages'],
                 cta: 'Start Free',
+                href: '/assess',
                 featured: false,
               },
               {
@@ -408,6 +409,7 @@ export default function LandingPage() {
                 desc: 'Your personalized college list',
                 features: ['Everything in Free', 'Full 10-15 school report', '20 AI messages', 'PDF export'],
                 cta: 'Get Report',
+                href: '/assess',
                 featured: false,
               },
               {
@@ -417,6 +419,7 @@ export default function LandingPage() {
                 desc: 'Full application support',
                 features: ['Everything in Report', 'Unlimited AI chat', 'Application strategy', 'Essay feedback'],
                 cta: 'Start Season',
+                href: '/assess',
                 featured: true,
               },
               {
@@ -426,6 +429,7 @@ export default function LandingPage() {
                 desc: 'The complete package',
                 features: ['Everything in Season', 'Financial aid analysis', 'Parent dashboard', 'Decision support'],
                 cta: 'Go Premium',
+                href: '/assess',
                 featured: false,
               },
             ].map((plan, i) => (
@@ -471,15 +475,16 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <button
-                  className={`w-full py-3 rounded-lg font-semibold text-sm transition-all cursor-pointer border-0 ${
+                <Link
+                  to={plan.href}
+                  className={`w-full py-3 rounded-lg font-semibold text-sm transition-all cursor-pointer border-0 block text-center no-underline ${
                     plan.featured
                       ? 'bg-gold hover:bg-gold-dark text-white shadow-lg shadow-gold/20'
                       : 'bg-navy/5 hover:bg-navy/10 text-navy'
                   }`}
                 >
                   {plan.cta}
-                </button>
+                </Link>
               </motion.div>
             ))}
           </div>
