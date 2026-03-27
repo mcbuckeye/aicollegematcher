@@ -100,6 +100,27 @@ def get_stats(db: Session = Depends(get_db)):
     }
 
 
+@router.post("/compare")
+def compare_schools(
+    payload: schemas.CompareRequest,
+    db: Session = Depends(get_db)
+):
+    """Compare 2-5 schools side by side with full data"""
+    if len(payload.school_ids) < 2:
+        raise HTTPException(status_code=400, detail="At least 2 schools required")
+    if len(payload.school_ids) > 5:
+        raise HTTPException(status_code=400, detail="Maximum 5 schools")
+
+    schools = db.query(models.School).filter(
+        models.School.id.in_(payload.school_ids)
+    ).all()
+
+    if not schools:
+        raise HTTPException(status_code=404, detail="No schools found")
+
+    return {"schools": schools}
+
+
 @router.get("/{school_id}", response_model=schemas.SchoolResponse)
 def get_school(school_id: int, db: Session = Depends(get_db)):
     """

@@ -148,3 +148,7 @@ class SchoolStats(BaseModel):
     avg_tuition: Optional[float] = None
     avg_graduation_rate: Optional[float] = None
     states_count: int
+
+
+class CompareRequest(BaseModel):
+    school_ids: List[int]

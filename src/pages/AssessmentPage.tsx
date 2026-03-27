@@ -80,6 +80,9 @@ export default function AssessmentPage() {
         const result = await submitAssessment(answers)
         setResult(result)
         trackEvent('quiz_complete', { readiness_score: result.readiness_score })
+        // Save to localStorage for Strategy, Compare, Parent Dashboard, Decision pages
+        localStorage.setItem('acm_assessment_answers', JSON.stringify(answers))
+        localStorage.setItem('acm_assessment_matches', JSON.stringify(result.top_matches))
         // Pre-fill and auto-submit email if provided in questionnaire
         if (answers.email) {
           setResultEmail(answers.email as string)
@@ -740,6 +743,25 @@ function ResultsScreen({
           >
             <MessageCircle className="w-4 h-4" />
             Start Chatting
+          </Link>
+        </motion.div>
+
+        {/* Share with Parents */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.75 }}
+          className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center mt-6"
+        >
+          <Users className="w-8 h-8 text-gold mx-auto mb-2" />
+          <h3 className="font-serif text-lg font-bold text-navy mb-1">Share with Parents</h3>
+          <p className="text-sm text-text-light mb-4">Show your parents a clear summary of costs, outcomes, and financial aid data.</p>
+          <Link
+            to="/parent-dashboard"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-navy/10 hover:bg-navy/20 text-navy font-semibold rounded-lg transition-all no-underline text-sm"
+          >
+            <Users className="w-4 h-4" />
+            Open Parent Dashboard
           </Link>
         </motion.div>
 

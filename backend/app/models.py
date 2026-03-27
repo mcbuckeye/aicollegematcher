@@ -159,3 +159,23 @@ class ChatMessage(Base):
     content = Column(Text, nullable=False)
     email = Column(String(255), index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class StrategyResult(Base):
+    __tablename__ = "strategy_results"
+
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(String(100), nullable=False, index=True)
+    email = Column(String(255), index=True)
+    strategy = Column(JSONB)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class DecisionResult(Base):
+    __tablename__ = "decision_results"
+
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(String(100), nullable=False, index=True)
+    email = Column(String(255), index=True)
+    decision_data = Column(JSONB)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

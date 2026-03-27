@@ -8,6 +8,10 @@ import SchoolDetailPage from './pages/SchoolDetailPage'
 import ChatPage from './pages/ChatPage'
 import EssayPage from './pages/EssayPage'
 import FinancialAidPage from './pages/FinancialAidPage'
+import StrategyPage from './pages/StrategyPage'
+import ComparePage from './pages/ComparePage'
+import ParentDashboardPage from './pages/ParentDashboardPage'
+import DecisionPage from './pages/DecisionPage'
 
 export default function App() {
   return (
@@ -22,6 +26,10 @@ export default function App() {
             <Route path="/chat" element={<ChatPage />} />
             <Route path="/essay" element={<EssayPage />} />
             <Route path="/financial-aid" element={<FinancialAidPage />} />
+            <Route path="/strategy" element={<StrategyPage />} />
+            <Route path="/compare" element={<ComparePage />} />
+            <Route path="/parent-dashboard" element={<ParentDashboardPage />} />
+            <Route path="/decide" element={<DecisionPage />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>
