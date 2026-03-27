@@ -1,5 +1,5 @@
 from pydantic import BaseModel, validator
-from typing import List, Optional, Literal
+from typing import Any, Dict, List, Optional, Literal
 from datetime import datetime
 
 
@@ -34,6 +34,61 @@ class SchoolBase(BaseModel):
     def default_empty_list(cls, v):
         return v if v is not None else []
     description: Optional[str] = None
+
+    # School info
+    school_url: Optional[str] = None
+    price_calculator_url: Optional[str] = None
+    alias: Optional[str] = None
+    address: Optional[str] = None
+    zip_code: Optional[str] = None
+    men_only: Optional[bool] = False
+    women_only: Optional[bool] = False
+    online_only: Optional[bool] = False
+    open_admissions: Optional[bool] = False
+    carnegie_basic: Optional[int] = None
+    carnegie_size_setting: Optional[int] = None
+    faculty_salary: Optional[int] = None
+    ft_faculty_rate: Optional[float] = None
+    tuition_revenue_per_fte: Optional[int] = None
+    instructional_expenditure_per_fte: Optional[int] = None
+
+    # Cost
+    book_supply_cost: Optional[int] = None
+    avg_net_price: Optional[int] = None
+    other_expense_oncampus: Optional[int] = None
+    cost_of_attendance: Optional[int] = None
+
+    # Aid
+    pell_grant_rate: Optional[float] = None
+    federal_loan_rate: Optional[float] = None
+    median_debt: Optional[int] = None
+    median_debt_monthly_payment: Optional[float] = None
+    students_with_any_loan: Optional[float] = None
+
+    # Student demographics
+    demographics_men: Optional[float] = None
+    demographics_women: Optional[float] = None
+    avg_age_entry: Optional[float] = None
+    first_generation_rate: Optional[float] = None
+    median_family_income: Optional[float] = None
+    part_time_share: Optional[float] = None
+    grad_students: Optional[int] = None
+    fafsa_applications: Optional[int] = None
+
+    # Earnings (multi-year)
+    earnings_6yr_after_entry: Optional[int] = None
+    earnings_8yr_after_entry: Optional[int] = None
+    earnings_1yr_after_completion: Optional[int] = None
+    earnings_4yr_after_completion: Optional[int] = None
+
+    # Completion
+    completion_rate_4yr_100: Optional[float] = None
+    completion_rate_4yr_200: Optional[float] = None
+    transfer_rate_4yr_ft: Optional[float] = None
+    consumer_rate: Optional[float] = None
+
+    # Programs
+    programs_offered: Optional[Dict[str, Any]] = None
 
 
 class SchoolCreate(SchoolBase):
