@@ -439,76 +439,118 @@ def categorize_match(match_score: int, school: Dict[str, Any],
 
 
 def generate_reason(school: Dict[str, Any], a: ParsedAnswers) -> str:
-    """Generate personalized match reason"""
-    reasons = []
+    """Generate a specific, data-driven match reason using real school stats."""
+    parts = []
+    name = _get(school, 'name', 'This school')
 
-    # Major match
+    # --- Major / program fit ---
     if a.major:
+        majors = _get(school, 'majors_strength', []) or []
         major_lower = a.major.lower()
-        majors_strength = _get(school, 'majors_strength', [])
-        has_major_match = any(
-            major_lower in m.lower() or m.lower() in major_lower
-            for m in majors_strength
-        )
-        if has_major_match:
-            reasons.append(f"strong {a.major} program")
+        matched = next((m for m in majors if major_lower in m.lower() or m.lower() in major_lower), None)
 
-    # Budget fit
+        earnings_6yr = _get(school, 'earnings_6yr_after_entry', 0) or 0
+        earnings_10yr = _get(school, 'median_earnings_10yr', 0) or 0
+
+        if matched and earnings_6yr > 50000:
+            parts.append(
+                f"{matched} is a strength here — graduates earn a median ${earnings_6yr:,.0f} "
+                f"within 6 years ({'+' if earnings_10yr > earnings_6yr else ''}"
+                f"${earnings_10yr:,.0f} by 10 years)"
+            )
+        elif matched:
+            parts.append(f"offers a strong {matched} program aligned with your interest in {a.major}")
+
+    # --- Cost / financial fit ---
     max_budget = budget_max(a.budget)
-    if max_budget is not None:
-        tuition = _get(school, 'tuition', 0)
-        fin_aid = _get(school, 'avg_financial_aid', 0)
-        net_cost = tuition - fin_aid
-        if net_cost <= max_budget:
-            reasons.append('fits within your budget with financial aid')
+    tuition = _get(school, 'tuition', 0) or 0
+    avg_net = _get(school, 'avg_net_price', 0) or 0
+    avg_aid = _get(school, 'avg_financial_aid', 0) or 0
+    pell_rate = _get(school, 'pell_grant_rate', 0) or 0
+    median_debt = _get(school, 'median_debt', 0) or 0
 
-    # Features
+    effective_cost = avg_net if avg_net else (tuition - avg_aid if avg_aid else tuition)
+    if max_budget and effective_cost > 0:
+        if effective_cost <= max_budget * 0.8:
+            parts.append(
+                f"average net price of ${effective_cost:,.0f}/yr is comfortably within your budget"
+            )
+        elif effective_cost <= max_budget:
+            parts.append(
+                f"net price of ${effective_cost:,.0f}/yr fits your ${max_budget:,.0f} budget"
+            )
+
+    if pell_rate > 0.35 and not parts:
+        parts.append(f"{pell_rate:.0%} of students receive Pell grants — strong financial aid culture")
+
+    if median_debt and median_debt < 18000 and 'cost' in (a.priorities or []):
+        parts.append(f"graduates leave with just ${median_debt:,.0f} median debt — well below average")
+
+    # --- Outcomes ---
+    earnings_10yr = _get(school, 'median_earnings_10yr', 0) or 0
+    grad_rate = _get(school, 'graduation_rate', 0) or 0
+    completion_4yr = _get(school, 'completion_rate_4yr_100', 0) or 0
+    retention = _get(school, 'retention_rate', 0) or 0
+
+    if 'outcomes' in (a.priorities or []) and earnings_10yr:
+        parts.append(f"median earnings of ${earnings_10yr:,.0f} at 10 years — top-tier career outcomes")
+    elif earnings_10yr >= 75000 and len(parts) < 2:
+        parts.append(f"strong earning power: ${earnings_10yr:,.0f} median at 10 years")
+
+    if completion_4yr >= 0.75 and 'academics' in (a.priorities or []):
+        parts.append(f"{completion_4yr:.0%} 4-year graduation rate signals a school that gets students to the finish line")
+    elif grad_rate >= 90 and 'academics' in (a.priorities or []):
+        parts.append(f"{grad_rate:.0f}% graduation rate reflects strong academic support")
+
+    if retention and retention >= 95 and len(parts) < 2:
+        parts.append(f"{retention:.0f}% of freshmen return sophomore year — students clearly love it here")
+
+    # --- Campus size & setting ---
+    size = _get(school, 'size', '')
+    setting = _get(school, 'setting', '')
+    enrollment = _get(school, 'enrollment', 0) or 0
+    sfr = _get(school, 'student_faculty_ratio', 0) or 0
+
+    if a.school_size and a.school_size != 'no-preference' and size == a.school_size:
+        setting_str = f" in a {setting} setting" if setting else ""
+        enroll_str = f" ({enrollment:,} undergrads)" if enrollment else ""
+        parts.append(f"the {size}-school environment{setting_str} you're looking for{enroll_str}")
+
+    if sfr and sfr <= 12 and 'academics' in (a.priorities or []) and len(parts) < 2:
+        parts.append(f"{sfr}:1 student-faculty ratio means real access to professors")
+
+    # --- Must-have features ---
     feature_labels = {
         'd1-sports': 'Division I athletics',
-        'greek-life': 'Greek life',
-        'research': 'research opportunities',
-        'coop': 'co-op programs',
-        'urban': 'urban campus',
-        'rural': 'college-town setting',
+        'greek-life': 'active Greek life',
+        'research': 'undergraduate research opportunities',
+        'coop': 'co-op/internship programs',
+        'urban': 'urban campus location',
+        'rural': 'classic college-town feel',
         'religious': 'faith-based community',
-        'diversity': 'strong diversity',
-        'study-abroad': 'study abroad options',
-        'honors': 'honors program',
+        'diversity': 'diverse student body',
+        'study-abroad': 'robust study abroad programs',
+        'honors': 'honors college',
     }
-    school_features = _get(school, 'features', [])
+    school_features = _get(school, 'features', []) or []
     matched_features = [
-        feature_labels[f] for f in a.must_haves 
+        feature_labels[f] for f in (a.must_haves or [])
         if f in school_features and f in feature_labels
     ]
-    if matched_features:
-        reasons.append(' and '.join(matched_features[:2]))
+    if matched_features and len(parts) < 2:
+        parts.append(f"checks your boxes: {', '.join(matched_features[:2])}")
 
-    # Size preference
-    if a.school_size and a.school_size != 'no-preference' and _get(school, 'size') == a.school_size:
-        size_label = {
-            'small': 'small, close-knit',
-            'medium': 'mid-sized',
-            'large': 'large, vibrant'
-        }.get(_get(school, 'size', 'medium'), 'mid-sized')
-        reasons.append(f"the {size_label} campus you prefer")
+    # --- Fallback to description ---
+    if not parts:
+        desc = _get(school, 'description', '')
+        if desc:
+            return desc.split('.')[0] + '.'
+        return f"A strong overall match for your profile and priorities."
 
-    # Top priority
-    if a.priorities:
-        top_priority = a.priorities[0]
-        if top_priority == 'outcomes' and _get(school, 'median_earnings_10yr', 0) >= 65000:
-            reasons.append('excellent career outcomes')
-        elif top_priority == 'academics' and _get(school, 'graduation_rate', 0) >= 88:
-            reasons.append('top-tier academic quality')
-        elif top_priority == 'cost':
-            tuition = _get(school, 'tuition', 0)
-            fin_aid = _get(school, 'avg_financial_aid', 0)
-            if (tuition - fin_aid) < 25000:
-                reasons.append('great value for your investment')
-
-    if not reasons:
-        return _get(school, 'description', 'A great match for you')
-
-    return f"Matches you with {', '.join(reasons[:3])}."
+    # Join up to 2 data points into a readable sentence
+    if len(parts) == 1:
+        return parts[0].capitalize() + "."
+    return f"{parts[0].capitalize()}; also {parts[1]}."
 
 
 def generate_strengths(a: ParsedAnswers) -> List[str]:
