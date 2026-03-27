@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from typing import List, Optional, Literal
 from datetime import datetime
 
@@ -27,8 +27,12 @@ class SchoolBase(BaseModel):
     region: Optional[str] = None
     hbcu: Optional[bool] = False
     religious_affiliation: Optional[bool] = False
-    features: List[str] = []
-    majors_strength: List[str] = []
+    features: Optional[List[str]] = []
+    majors_strength: Optional[List[str]] = []
+
+    @validator('features', 'majors_strength', pre=True, always=True)
+    def default_empty_list(cls, v):
+        return v if v is not None else []
     description: Optional[str] = None
 
 
