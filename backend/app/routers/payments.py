@@ -14,28 +14,29 @@ STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
 if STRIPE_SECRET_KEY:
     stripe.api_key = STRIPE_SECRET_KEY
 
+# Price IDs created in Stripe live account (Dashtivity / steve@ipwatcher.com)
+STRIPE_PRICE_IDS = {
+    "report": os.getenv("STRIPE_PRICE_REPORT", "price_0TFbxC1bYiDI3CPBpjy3owk6"),
+    "season": os.getenv("STRIPE_PRICE_SEASON", "price_0TFbxD1bYiDI3CPB7Se3fpDw"),
+    "premium": os.getenv("STRIPE_PRICE_PREMIUM", "price_0TFbxD1bYiDI3CPBl5hxVQ5r"),
+}
+
 # Price mapping: tier -> Stripe price config
 TIER_CONFIG = {
     "report": {
-        "amount": 4900,  # $49.00
-        "currency": "usd",
+        "price_id": STRIPE_PRICE_IDS["report"],
         "mode": "payment",
         "name": "Match Report",
-        "description": "Full 10-15 school report + 20 AI messages + PDF export",
     },
     "season": {
-        "amount": 2900,  # $29.00/mo
-        "currency": "usd",
+        "price_id": STRIPE_PRICE_IDS["season"],
         "mode": "subscription",
         "name": "Season Pass",
-        "description": "Unlimited AI chat + application strategy + essay feedback",
     },
     "premium": {
-        "amount": 9900,  # $99.00/mo
-        "currency": "usd",
+        "price_id": STRIPE_PRICE_IDS["premium"],
         "mode": "subscription",
         "name": "Premium",
-        "description": "Financial aid analysis + parent dashboard + decision support",
     },
 }
 
@@ -61,30 +62,13 @@ def create_checkout_session(
     try:
         session_params = {
             "payment_method_types": ["card"],
-            "line_items": [
-                {
-                    "price_data": {
-                        "currency": config["currency"],
-                        "product_data": {
-                            "name": config["name"],
-                            "description": config["description"],
-                        },
-                        "unit_amount": config["amount"],
-                    },
-                    "quantity": 1,
-                }
-            ],
+            "line_items": [{"price": config["price_id"], "quantity": 1}],
             "mode": config["mode"],
-            "success_url": success_url + "&tier=" + tier + "&email={CHECKOUT_SESSION_ID}",
-            "cancel_url": cancel_url,
+            "success_url": f"https://aicollegematcher.machomelab.com/assess?payment=success&tier={tier}",
+            "cancel_url": "https://aicollegematcher.machomelab.com/#pricing",
             "metadata": {"tier": tier},
+            "allow_promotion_codes": True,
         }
-
-        # Add recurring for subscriptions
-        if config["mode"] == "subscription":
-            session_params["line_items"][0]["price_data"]["recurring"] = {
-                "interval": "month"
-            }
 
         if email:
             session_params["customer_email"] = email
