@@ -55,14 +55,17 @@ def admin_stats(x_admin_key: str = Header(...)):
 
         # Top matched schools
         from sqlalchemy import union_all, literal_column
-        match_q1 = db.query(Lead.top_match_1.label("school")).filter(Lead.top_match_1.isnot(None))
-        match_q2 = db.query(Lead.top_match_2.label("school")).filter(Lead.top_match_2.isnot(None))
-        match_q3 = db.query(Lead.top_match_3.label("school")).filter(Lead.top_match_3.isnot(None))
-        all_matches = match_q1.union_all(match_q2).union_all(match_q3).subquery()
-        school_rows = db.query(
-            all_matches.c.school, func.count().label("cnt")
-        ).group_by(all_matches.c.school).order_by(func.count().desc()).limit(10).all()
-        top_schools_matched = [{"school": s, "count": c} for s, c in school_rows]
+        from sqlalchemy import union_all, literal_column, text as sa_text
+        school_counts: dict = {}
+        for col in [Lead.top_match_1, Lead.top_match_2, Lead.top_match_3]:
+            rows = db.query(col).filter(col.isnot(None)).all()
+            for (name,) in rows:
+                if name:
+                    school_counts[name] = school_counts.get(name, 0) + 1
+        top_schools_matched = [
+            {"school": s, "count": c}
+            for s, c in sorted(school_counts.items(), key=lambda x: -x[1])[:10]
+        ]
 
         # Analytics events (last 7 days by type)
         event_rows = db.query(
