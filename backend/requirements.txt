@@ -13,4 +13,4 @@ pgeocode==0.5.0
 alembic==1.14.1
 reportlab==4.1.0
 stripe==7.0.0
-openai==1.51.0
+openai>=1.60.0
