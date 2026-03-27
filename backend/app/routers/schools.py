@@ -25,9 +25,15 @@ def list_schools(
     """
     query = db.query(models.School)
     
-    # Text search (name)
+    # Text search (name + alias)
     if q:
-        query = query.filter(models.School.name.ilike(f"%{q}%"))
+        from sqlalchemy import or_
+        query = query.filter(
+            or_(
+                models.School.name.ilike(f"%{q}%"),
+                models.School.alias.ilike(f"%{q}%"),
+            )
+        )
     
     # Filters
     if state:
