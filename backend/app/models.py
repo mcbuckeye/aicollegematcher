@@ -96,6 +96,16 @@ class School(Base):
     programs_offered = Column(JSONB)
 
 
+class AnalyticsEvent(Base):
+    __tablename__ = "analytics_events"
+
+    id = Column(Integer, primary_key=True, index=True)
+    event_type = Column(String(50), nullable=False, index=True)
+    event_data = Column(JSONB, default={})
+    session_id = Column(String(100), index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
 class Lead(Base):
     __tablename__ = "leads"
 

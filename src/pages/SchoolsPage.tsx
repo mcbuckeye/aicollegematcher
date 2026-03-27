@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { listSchools, type School } from '../services/api';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -217,15 +218,16 @@ export default function SchoolsPage() {
               {/* Schools Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 {schools.map((school) => (
-                  <div
+                  <Link
                     key={school.id}
-                    className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow p-6"
+                    to={`/schools/${school.id}`}
+                    className="bg-white rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200 p-6 block no-underline text-inherit cursor-pointer"
                   >
                     <h3 className="text-xl font-bold text-gray-900 mb-2">{school.name}</h3>
                     <p className="text-gray-600 mb-4">
                       {school.city}, {school.state}
                     </p>
-                    
+
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-gray-600">Type:</span>
@@ -263,7 +265,7 @@ export default function SchoolsPage() {
                         ))}
                       </div>
                     )}
-                  </div>
+                  </Link>
                 ))}
               </div>
 

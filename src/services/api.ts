@@ -37,6 +37,35 @@ export interface School {
   description: string | null
   created_at: string
   updated_at: string | null
+  // Extended fields
+  school_url: string | null
+  price_calculator_url: string | null
+  alias: string | null
+  book_supply_cost: number | null
+  avg_net_price: number | null
+  cost_of_attendance: number | null
+  pell_grant_rate: number | null
+  federal_loan_rate: number | null
+  median_debt: number | null
+  median_debt_monthly_payment: number | null
+  students_with_any_loan: number | null
+  demographics_men: number | null
+  demographics_women: number | null
+  avg_age_entry: number | null
+  first_generation_rate: number | null
+  median_family_income: number | null
+  part_time_share: number | null
+  grad_students: number | null
+  fafsa_applications: number | null
+  earnings_6yr_after_entry: number | null
+  earnings_8yr_after_entry: number | null
+  earnings_1yr_after_completion: number | null
+  earnings_4yr_after_completion: number | null
+  completion_rate_4yr_100: number | null
+  completion_rate_4yr_200: number | null
+  transfer_rate_4yr_ft: number | null
+  consumer_rate: number | null
+  programs_offered: Record<string, boolean> | null
 }
 
 export interface SchoolMatch {
@@ -143,6 +172,43 @@ export async function submitAssessment(answers: Record<string, unknown>): Promis
   }
   
   return response.json()
+}
+
+export async function downloadPdfReport(answers: Record<string, unknown>): Promise<void> {
+  const snakeCaseAnswers = {
+    grade: answers.grade,
+    gpa: answers.gpa,
+    test_scores: answers.testScores,
+    major: answers.major,
+    school_size: answers.schoolSize,
+    distance: answers.distance,
+    zip_code: answers.zipCode,
+    priorities: answers.priorities,
+    budget: answers.budget,
+    must_haves: answers.mustHaves,
+    biggest_worry: answers.biggestWorry,
+    email: answers.email,
+  }
+
+  const response = await fetch(`${API_BASE_URL}/assessment/report`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(snakeCaseAnswers),
+  })
+
+  if (!response.ok) {
+    throw new Error(`Failed to generate report: ${response.statusText}`)
+  }
+
+  const blob = await response.blob()
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = 'college_match_report.pdf'
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
 }
 
 export async function checkHealth(): Promise<{ status: string; service: string }> {

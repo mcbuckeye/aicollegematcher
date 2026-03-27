@@ -19,7 +19,8 @@ import {
 } from 'lucide-react'
 import { questions, type Question } from '../data/assessmentQuestions'
 import { MAJORS } from '../data/majors'
-import { submitAssessment, type AssessmentResult, type SchoolMatch } from '../services/api'
+import { submitAssessment, downloadPdfReport, type AssessmentResult, type SchoolMatch } from '../services/api'
+import { trackEvent } from '../services/analytics'
 import ScoreGauge from '../components/ScoreGauge'
 
 const slideVariants = {
@@ -56,10 +57,14 @@ export default function AssessmentPage() {
 
   async function next() {
     if (!canAdvance()) return
+    if (step === 0) {
+      trackEvent('quiz_start', { step: 0 })
+    }
     if (isLast) {
       try {
         const result = await submitAssessment(answers)
         setResult(result)
+        trackEvent('quiz_complete', { readiness_score: result.readiness_score })
         // Pre-fill and auto-submit email if provided in questionnaire
         if (answers.email) {
           setResultEmail(answers.email as string)
@@ -67,7 +72,6 @@ export default function AssessmentPage() {
         }
       } catch (error) {
         console.error('Failed to submit assessment:', error)
-        // Optionally show an error message to the user
       }
     } else {
       setDir(1)
@@ -90,6 +94,7 @@ export default function AssessmentPage() {
         setEmail={setResultEmail}
         submitted={emailSubmitted}
         setSubmitted={setEmailSubmitted}
+        answers={answers}
       />
     )
   }
@@ -438,11 +443,13 @@ function ResultsScreen({
   setEmail,
   submitted,
   setSubmitted,
+  answers,
 }: {
   result: AssessmentResult
   email: string
   setEmail: (e: string) => void
   submitted: boolean
+  answers: Record<string, unknown>
   setSubmitted: (s: boolean) => void
 }) {
   function handleEmail(e: React.FormEvent) {
@@ -450,6 +457,20 @@ function ResultsScreen({
     if (!email) return
     console.log('[Assessment email capture]', email)
     setSubmitted(true)
+  }
+
+  const [pdfLoading, setPdfLoading] = useState(false)
+
+  async function handleDownloadPdf() {
+    setPdfLoading(true)
+    trackEvent('pdf_download', { readiness_score: result.readiness_score })
+    try {
+      await downloadPdfReport(answers)
+    } catch (err) {
+      console.error('PDF download failed:', err)
+    } finally {
+      setPdfLoading(false)
+    }
   }
 
   function shareResults() {
@@ -576,6 +597,17 @@ function ResultsScreen({
             ))}
           </div>
 
+          {/* PDF Download */}
+          <div className="mt-6 text-center">
+            <button
+              onClick={handleDownloadPdf}
+              disabled={pdfLoading}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gold to-gold-dark hover:from-gold-dark hover:to-gold text-white font-semibold rounded-lg transition-all cursor-pointer border-0 text-sm disabled:opacity-50"
+            >
+              {pdfLoading ? 'Generating...' : 'Download PDF Report'}
+            </button>
+          </div>
+
           {/* Blurred teaser */}
           <div className="mt-6 relative">
             <div className="blur-sm pointer-events-none select-none">
@@ -674,41 +706,43 @@ function SchoolCard({
   getCategoryColor: (cat: string) => string
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: 0.5 + index * 0.15 }}
-      className="p-5 rounded-xl bg-warm-gray border border-gray-100"
-    >
-      <div className="flex items-start gap-4">
-        <div className="w-12 h-12 bg-gradient-to-br from-navy/10 to-navy/5 rounded-xl flex items-center justify-center shrink-0">
-          <GraduationCap className="w-6 h-6 text-navy" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2 mb-1">
-            <h3 className="font-bold text-navy">{match.school.name}</h3>
-            <span className="text-sm font-bold text-gold whitespace-nowrap">{match.match_score}% match</span>
+    <Link to={`/schools/${match.school.id}`} className="block no-underline text-inherit">
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.5 + index * 0.15 }}
+        className="p-5 rounded-xl bg-warm-gray border border-gray-100 hover:shadow-md hover:border-navy/20 transition-all cursor-pointer"
+      >
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 bg-gradient-to-br from-navy/10 to-navy/5 rounded-xl flex items-center justify-center shrink-0">
+            <GraduationCap className="w-6 h-6 text-navy" />
           </div>
-          <div className="flex items-center gap-3 text-xs text-text-light mb-2">
-            <span className="flex items-center gap-1">
-              <MapPin className="w-3 h-3" />
-              {match.school.city}, {match.school.state}
-            </span>
-            <span className="flex items-center gap-1">
-              <Users className="w-3 h-3" />
-              {(match.school.enrollment || 0).toLocaleString()} students
-            </span>
-            <span className="flex items-center gap-1">
-              <DollarSign className="w-3 h-3" />
-              {Math.round((match.school.tuition || 0) / 1000)}k/yr
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-2 mb-1">
+              <h3 className="font-bold text-navy">{match.school.name}</h3>
+              <span className="text-sm font-bold text-gold whitespace-nowrap">{match.match_score}% match</span>
+            </div>
+            <div className="flex items-center gap-3 text-xs text-text-light mb-2">
+              <span className="flex items-center gap-1">
+                <MapPin className="w-3 h-3" />
+                {match.school.city}, {match.school.state}
+              </span>
+              <span className="flex items-center gap-1">
+                <Users className="w-3 h-3" />
+                {(match.school.enrollment || 0).toLocaleString()} students
+              </span>
+              <span className="flex items-center gap-1">
+                <DollarSign className="w-3 h-3" />
+                {Math.round((match.school.tuition || 0) / 1000)}k/yr
+              </span>
+            </div>
+            <p className="text-sm text-text-light">{match.reason}</p>
+            <span className={`inline-block mt-2 text-xs font-semibold px-2.5 py-0.5 rounded-full ${getCategoryColor(match.category)}`}>
+              {getCategoryLabel(match.category)}
             </span>
           </div>
-          <p className="text-sm text-text-light">{match.reason}</p>
-          <span className={`inline-block mt-2 text-xs font-semibold px-2.5 py-0.5 rounded-full ${getCategoryColor(match.category)}`}>
-            {getCategoryLabel(match.category)}
-          </span>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </Link>
   )
 }

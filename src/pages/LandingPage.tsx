@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
@@ -35,6 +36,10 @@ const stagger = {
 }
 
 export default function LandingPage() {
+  useEffect(() => {
+    import('../services/analytics').then(({ trackEvent }) => trackEvent('page_view', { page: 'landing' }))
+  }, [])
+
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
