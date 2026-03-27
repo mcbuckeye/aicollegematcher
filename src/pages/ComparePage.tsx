@@ -22,7 +22,7 @@ type CompareRow = {
 }
 
 const COMPARE_ROWS: CompareRow[] = [
-  { label: 'Acceptance Rate', key: 'acceptance_rate', format: v => v != null ? `${(v * 100).toFixed(1)}%` : '—', category: 'Admissions', higherIsBetter: false },
+  { label: 'Acceptance Rate', key: 'acceptance_rate', format: v => v != null ? `${v < 1 ? (v * 100).toFixed(1) : v.toFixed(1)}%` : '—', category: 'Admissions', higherIsBetter: false },
   { label: 'Graduation Rate (6yr)', key: 'graduation_rate', format: v => v != null ? `${v}%` : '—', category: 'Academics', higherIsBetter: true },
   { label: 'Retention Rate', key: 'retention_rate', format: v => v != null ? `${v}%` : '—', category: 'Academics', higherIsBetter: true },
   { label: 'SAT Range', key: 'sat_range', format: (_: any, s: any) => s?.sat_range_low && s?.sat_range_high ? `${s.sat_range_low}–${s.sat_range_high}` : '—', category: 'Admissions' },
