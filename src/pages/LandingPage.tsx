@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import {
   GraduationCap,
@@ -64,6 +65,18 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-white">
+      <Helmet>
+        <title>AI College Matcher - Find Your Perfect College Match</title>
+        <meta name="description" content="Get personalized college guidance powered by AI. Match with 2,000+ US colleges based on your goals, budget, and dreams. Free 2-minute assessment." />
+        <meta property="og:title" content="AI College Matcher - Find Your Perfect College Match" />
+        <meta property="og:description" content="Get personalized college guidance powered by AI. Match with 2,000+ US colleges based on your goals, budget, and dreams." />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://aicollegematcher.machomelab.com" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="AI College Matcher - Find Your Perfect College Match" />
+        <meta name="twitter:description" content="Get personalized college guidance powered by AI. Free 2-minute assessment." />
+        <link rel="canonical" href="https://aicollegematcher.machomelab.com" />
+      </Helmet>
       <Navbar />
 
       {/* Hero */}
@@ -137,7 +150,7 @@ export default function LandingPage() {
             animate="visible"
             custom={4}
             variants={fadeUp}
-            className="mt-8 flex items-center justify-center gap-6 text-sm text-text-light"
+            className="mt-8 flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-text-light"
           >
             <span className="flex items-center gap-1.5">
               <Clock className="w-4 h-4 text-gold" />
@@ -167,7 +180,7 @@ export default function LandingPage() {
               key={stat.number}
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              viewport={{ once: true, amount: 0.05 }}
               transition={{ delay: i * 0.15 }}
             >
               <div className="text-3xl sm:text-4xl font-bold text-gold mb-1">{stat.number}</div>
@@ -183,7 +196,7 @@ export default function LandingPage() {
           <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.05 }}
             variants={fadeUp}
             className="text-center mb-14"
           >
@@ -224,7 +237,7 @@ export default function LandingPage() {
                 key={card.title}
                 initial="hidden"
                 whileInView="visible"
-                viewport={{ once: true }}
+                viewport={{ once: true, amount: 0.05 }}
                 custom={i}
                 variants={fadeUp}
                 className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow"
@@ -246,7 +259,7 @@ export default function LandingPage() {
           <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.05 }}
             variants={fadeUp}
             className="text-center mb-16"
           >
@@ -284,7 +297,7 @@ export default function LandingPage() {
                 key={item.step}
                 initial="hidden"
                 whileInView="visible"
-                viewport={{ once: true }}
+                viewport={{ once: true, amount: 0.05 }}
                 custom={i}
                 variants={fadeUp}
                 className="text-center relative"
@@ -311,7 +324,7 @@ export default function LandingPage() {
           <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.05 }}
             custom={4}
             variants={fadeUp}
             className="text-center mt-14"
@@ -333,7 +346,7 @@ export default function LandingPage() {
           <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.05 }}
             variants={fadeUp}
             className="text-center mb-14"
           >
@@ -349,7 +362,7 @@ export default function LandingPage() {
           <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.05 }}
             variants={stagger}
             className="grid sm:grid-cols-2 gap-6"
           >
@@ -404,7 +417,7 @@ export default function LandingPage() {
           <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.05 }}
             variants={fadeUp}
             className="text-center mb-14"
           >
@@ -464,7 +477,7 @@ export default function LandingPage() {
                 key={plan.name}
                 initial="hidden"
                 whileInView="visible"
-                viewport={{ once: true }}
+                viewport={{ once: true, amount: 0.05 }}
                 custom={i}
                 variants={fadeUp}
                 className={`rounded-2xl p-7 flex flex-col transition-shadow ${
@@ -536,7 +549,7 @@ export default function LandingPage() {
           <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.05 }}
             variants={fadeUp}
             className="text-center mb-14"
           >
@@ -568,7 +581,7 @@ export default function LandingPage() {
                 key={item.title}
                 initial="hidden"
                 whileInView="visible"
-                viewport={{ once: true }}
+                viewport={{ once: true, amount: 0.05 }}
                 custom={i}
                 variants={fadeUp}
                 className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100"
@@ -590,7 +603,7 @@ export default function LandingPage() {
           <motion.div
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true }}
+            viewport={{ once: true, amount: 0.05 }}
             variants={fadeUp}
             className="bg-gradient-to-br from-navy to-navy-dark rounded-3xl p-10 sm:p-14 text-center text-white relative overflow-hidden"
           >

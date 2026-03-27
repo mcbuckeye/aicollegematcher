@@ -14,6 +14,7 @@ import {
   Heart,
   Building2,
 } from 'lucide-react'
+import { Helmet } from 'react-helmet-async'
 import { getSchool, type School } from '../services/api'
 import { trackEvent } from '../services/analytics'
 import Navbar from '../components/Navbar'
@@ -171,6 +172,11 @@ export default function SchoolDetailPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-50">
+      <Helmet>
+        <title>{school.name} | AI College Matcher</title>
+        <meta name="description" content={`Explore ${school.name} - acceptance rate, tuition, graduation rate, and more. See if it's a match for you.`} />
+        <link rel="canonical" href={`https://aicollegematcher.machomelab.com/schools/${school.id}`} />
+      </Helmet>
       <Navbar />
 
       <main className="flex-grow mt-16">

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { GraduationCap, Menu, X, MessageCircle } from 'lucide-react'
+import { GraduationCap, Menu, X, MessageCircle, FileText, DollarSign } from 'lucide-react'
 
 export default function Navbar() {
   const [open, setOpen] = useState(false)
@@ -39,6 +39,10 @@ export default function Navbar() {
               <MessageCircle className="w-3.5 h-3.5" />
               AI Chat
             </Link>
+            <Link to="/essay" className="text-sm text-text-light hover:text-navy transition-colors no-underline inline-flex items-center gap-1">
+              <FileText className="w-3.5 h-3.5" />
+              Essays
+            </Link>
             <Link
               to="/assess"
               className="bg-gradient-to-r from-gold to-gold-dark hover:from-gold-dark hover:to-gold text-white font-semibold text-sm px-5 py-2.5 rounded-lg transition-all no-underline shadow-sm hover:shadow-md"
@@ -54,6 +58,14 @@ export default function Navbar() {
             <Link to="/chat" className="text-sm text-text-light hover:text-navy transition-colors no-underline inline-flex items-center gap-1">
               <MessageCircle className="w-3.5 h-3.5" />
               AI Chat
+            </Link>
+            <Link to="/essay" className="text-sm text-text-light hover:text-navy transition-colors no-underline inline-flex items-center gap-1">
+              <FileText className="w-3.5 h-3.5" />
+              Essays
+            </Link>
+            <Link to="/financial-aid" className="text-sm text-text-light hover:text-navy transition-colors no-underline inline-flex items-center gap-1">
+              <DollarSign className="w-3.5 h-3.5" />
+              Aid
             </Link>
             <Link
               to="/"
@@ -94,6 +106,14 @@ export default function Navbar() {
               <Link to="/chat" onClick={() => setOpen(false)} className="text-text-light hover:text-navy transition-colors no-underline flex items-center gap-1">
                 <MessageCircle className="w-3.5 h-3.5" />
                 AI Chat
+              </Link>
+              <Link to="/essay" onClick={() => setOpen(false)} className="text-text-light hover:text-navy transition-colors no-underline flex items-center gap-1">
+                <FileText className="w-3.5 h-3.5" />
+                Essay Feedback
+              </Link>
+              <Link to="/financial-aid" onClick={() => setOpen(false)} className="text-text-light hover:text-navy transition-colors no-underline flex items-center gap-1">
+                <DollarSign className="w-3.5 h-3.5" />
+                Financial Aid
               </Link>
               <Link
                 to={isHome ? '/assess' : '/'}

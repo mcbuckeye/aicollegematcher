@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import schools, assessment, leads, analytics, report, payments, chat
+from .routers import schools, assessment, leads, analytics, report, payments, chat, essay, financial_aid
 from .database import engine, Base
 
 # Create database tables
@@ -34,6 +34,8 @@ app.include_router(analytics.router)
 app.include_router(report.router)
 app.include_router(payments.router)
 app.include_router(chat.router)
+app.include_router(essay.router)
+app.include_router(financial_aid.router)
 
 
 @app.get("/api/health")

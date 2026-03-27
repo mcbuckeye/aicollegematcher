@@ -137,6 +137,19 @@ class Subscription(Base):
     expires_at = Column(DateTime(timezone=True))
 
 
+class EssaySubmission(Base):
+    __tablename__ = "essay_submissions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(String(100), nullable=False, index=True)
+    email = Column(String(255), index=True)
+    essay_type = Column(String(50), nullable=False)
+    essay_text = Column(Text, nullable=False)
+    feedback = Column(JSONB)
+    school_name = Column(String(255))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
 class ChatMessage(Base):
     __tablename__ = "chat_messages"
 

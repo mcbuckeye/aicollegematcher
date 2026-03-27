@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import { motion } from 'framer-motion'
 import { Send, GraduationCap, MessageCircle, Lock, ArrowRight } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
@@ -96,6 +97,11 @@ export default function ChatPage() {
 
   return (
     <div className="min-h-screen bg-warm-gray flex flex-col">
+      <Helmet>
+        <title>AI College Advisor Chat | AI College Matcher</title>
+        <meta name="description" content="Chat with our AI college advisor for personalized guidance on college selection, applications, and more." />
+        <link rel="canonical" href="https://aicollegematcher.machomelab.com/chat" />
+      </Helmet>
       <Navbar />
 
       <div className="flex-1 flex flex-col max-w-3xl mx-auto w-full px-4 pt-20 pb-4">

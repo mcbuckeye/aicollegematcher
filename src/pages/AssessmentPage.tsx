@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { Helmet } from 'react-helmet-async'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowLeft,
@@ -523,6 +524,11 @@ function ResultsScreen({
 
   return (
     <div className="min-h-screen bg-warm-gray">
+      <Helmet>
+        <title>College Match Assessment | AI College Matcher</title>
+        <meta name="description" content="Take our free 2-minute assessment to get personalized college matches based on your goals, grades, and preferences." />
+        <link rel="canonical" href="https://aicollegematcher.machomelab.com/assess" />
+      </Helmet>
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* Back link */}
         <div className="flex items-center justify-between mb-8">

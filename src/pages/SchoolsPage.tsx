@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import { listSchools, type School } from '../services/api';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -65,6 +66,11 @@ export default function SchoolsPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-50">
+      <Helmet>
+        <title>Browse 2,000+ Colleges | AI College Matcher</title>
+        <meta name="description" content="Explore over 2,000 US colleges with detailed stats on acceptance rates, tuition, graduation rates, and more." />
+        <link rel="canonical" href="https://aicollegematcher.machomelab.com/schools" />
+      </Helmet>
       <Navbar />
       
       <main className="flex-grow container mx-auto px-4 py-8 mt-16">
