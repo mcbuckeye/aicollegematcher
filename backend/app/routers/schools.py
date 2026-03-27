@@ -25,15 +25,26 @@ def list_schools(
     """
     query = db.query(models.School)
     
-    # Text search (name + alias)
+    # Text search (name + alias) with relevance ranking
     if q:
-        from sqlalchemy import or_
+        from sqlalchemy import or_, case, literal
         query = query.filter(
             or_(
                 models.School.name.ilike(f"%{q}%"),
                 models.School.alias.ilike(f"%{q}%"),
             )
         )
+        # Rank: exact alias match > alias word match > name starts with > substring
+        search_rank = case(
+            # Exact alias match (e.g. "MIT" in "MIT, M.I.T.")
+            (models.School.alias.op('~*')(f'(^|,\\s*){q}(\\s*,|$)'), literal(1)),
+            # Name starts with query
+            (models.School.name.ilike(f"{q}%"), literal(2)),
+            # Alias contains query
+            (models.School.alias.ilike(f"%{q}%"), literal(3)),
+            else_=literal(4),
+        )
+        query = query.order_by(search_rank)
     
     # Filters
     if state:
@@ -54,8 +65,10 @@ def list_schools(
     # Get total count
     total = query.count()
     
-    # Apply pagination and fetch
-    schools = query.order_by(models.School.name).offset(offset).limit(limit).all()
+    # Apply pagination and fetch (search already has relevance ordering)
+    if not q:
+        query = query.order_by(models.School.name)
+    schools = query.offset(offset).limit(limit).all()
     
     return {
         "schools": schools,
