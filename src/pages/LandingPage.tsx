@@ -25,7 +25,7 @@ import Footer from '../components/Footer'
 import { createCheckoutSession } from '../services/api'
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
+  hidden: { opacity: 0.15, y: 20 },
   visible: (i: number = 0) => ({
     opacity: 1,
     y: 0,
