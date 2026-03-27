@@ -94,7 +94,8 @@ def get_major_detail(major_slug: str):
                 FROM schools
                 WHERE programs_offered ? :pkey
                   AND graduation_rate IS NOT NULL
-                ORDER BY graduation_rate DESC
+                  AND enrollment > 1000
+                ORDER BY graduation_rate DESC, enrollment DESC
                 LIMIT 10
             """)
             rows = db.execute(query, {"pkey": program_key}).fetchall()
