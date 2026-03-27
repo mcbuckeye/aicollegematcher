@@ -122,3 +122,27 @@ class Lead(Base):
     top_match_3 = Column(String(255))
     answers = Column(JSON)  # full assessment payload for reference
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class Subscription(Base):
+    __tablename__ = "subscriptions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(255), nullable=False, index=True)
+    stripe_customer_id = Column(String(255))
+    stripe_subscription_id = Column(String(255))
+    tier = Column(String(20), nullable=False, default="free")  # free/report/season/premium
+    status = Column(String(20), nullable=False, default="active")  # active/canceled/expired
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    expires_at = Column(DateTime(timezone=True))
+
+
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+
+    id = Column(Integer, primary_key=True, index=True)
+    session_id = Column(String(100), nullable=False, index=True)
+    role = Column(String(20), nullable=False)  # user/assistant
+    content = Column(Text, nullable=False)
+    email = Column(String(255), index=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

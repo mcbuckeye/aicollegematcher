@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import {
   GraduationCap,
@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import { createCheckoutSession } from '../services/api'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -36,9 +37,30 @@ const stagger = {
 }
 
 export default function LandingPage() {
+  const navigate = useNavigate()
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null)
+
   useEffect(() => {
     import('../services/analytics').then(({ trackEvent }) => trackEvent('page_view', { page: 'landing' }))
   }, [])
+
+  async function handlePaidPlan(tier: string) {
+    setCheckoutLoading(tier)
+    try {
+      const origin = window.location.origin
+      const res = await createCheckoutSession({
+        tier,
+        success_url: `${origin}/assess?payment=success`,
+        cancel_url: `${origin}/#pricing`,
+      })
+      window.location.href = res.checkout_url
+    } catch {
+      // If Stripe isn't configured, fall through to assessment
+      navigate('/assess')
+    } finally {
+      setCheckoutLoading(null)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -480,16 +502,28 @@ export default function LandingPage() {
                     </li>
                   ))}
                 </ul>
-                <Link
-                  to={plan.href}
-                  className={`w-full py-3 rounded-lg font-semibold text-sm transition-all cursor-pointer border-0 block text-center no-underline ${
-                    plan.featured
-                      ? 'bg-gold hover:bg-gold-dark text-white shadow-lg shadow-gold/20'
-                      : 'bg-navy/5 hover:bg-navy/10 text-navy'
-                  }`}
-                >
-                  {plan.cta}
-                </Link>
+                {plan.name === 'Free' ? (
+                  <Link
+                    to="/assess"
+                    className={`w-full py-3 rounded-lg font-semibold text-sm transition-all cursor-pointer border-0 block text-center no-underline bg-navy/5 hover:bg-navy/10 text-navy`}
+                  >
+                    {plan.cta}
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => handlePaidPlan(plan.name === 'Match Report' ? 'report' : plan.name === 'Season Pass' ? 'season' : 'premium')}
+                    disabled={checkoutLoading !== null}
+                    className={`w-full py-3 rounded-lg font-semibold text-sm transition-all cursor-pointer border-0 ${
+                      plan.featured
+                        ? 'bg-gold hover:bg-gold-dark text-white shadow-lg shadow-gold/20'
+                        : 'bg-navy/5 hover:bg-navy/10 text-navy'
+                    } disabled:opacity-50`}
+                  >
+                    {checkoutLoading === (plan.name === 'Match Report' ? 'report' : plan.name === 'Season Pass' ? 'season' : 'premium')
+                      ? 'Loading...'
+                      : plan.cta}
+                  </button>
+                )}
               </motion.div>
             ))}
           </div>

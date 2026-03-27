@@ -216,6 +216,52 @@ export async function checkHealth(): Promise<{ status: string; service: string }
   if (!response.ok) {
     throw new Error(`Health check failed: ${response.statusText}`)
   }
-  
+
+  return response.json()
+}
+
+// Payments
+export async function createCheckoutSession(payload: {
+  tier: string
+  email?: string
+  success_url?: string
+  cancel_url?: string
+}): Promise<{ checkout_url: string; session_id: string }> {
+  const response = await fetch(`${API_BASE_URL}/payments/create-checkout`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  if (!response.ok) {
+    throw new Error(`Failed to create checkout: ${response.statusText}`)
+  }
+  return response.json()
+}
+
+export async function getPaymentStatus(email: string): Promise<{ tier: string; status: string }> {
+  const response = await fetch(`${API_BASE_URL}/payments/status?email=${encodeURIComponent(email)}`)
+  if (!response.ok) {
+    throw new Error(`Failed to get payment status: ${response.statusText}`)
+  }
+  return response.json()
+}
+
+// Chat
+export async function sendChatMessage(payload: {
+  message: string
+  email?: string
+  session_id: string
+  context?: Record<string, unknown>
+}): Promise<{ reply: string; remaining_messages: number | null; limit: number | null }> {
+  const response = await fetch(`${API_BASE_URL}/chat/message`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+  if (!response.ok) {
+    const error: any = new Error(`Chat failed: ${response.statusText}`)
+    error.status = response.status
+    throw error
+  }
   return response.json()
 }

@@ -1,5 +1,5 @@
-import { useState, useMemo, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useMemo, useRef, useEffect } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   ArrowLeft,
@@ -7,6 +7,7 @@ import {
   GraduationCap,
   GripVertical,
   Lock,
+  MessageCircle,
   ChevronDown,
   Search,
   Share2,
@@ -22,6 +23,7 @@ import { MAJORS } from '../data/majors'
 import { submitAssessment, downloadPdfReport, type AssessmentResult, type SchoolMatch } from '../services/api'
 import { trackEvent } from '../services/analytics'
 import ScoreGauge from '../components/ScoreGauge'
+import { useAuth } from '../contexts/AuthContext'
 
 const slideVariants = {
   enter: (dir: number) => ({ x: dir > 0 ? 80 : -80, opacity: 0 }),
@@ -36,6 +38,18 @@ export default function AssessmentPage() {
   const [result, setResult] = useState<AssessmentResult | null>(null)
   const [resultEmail, setResultEmail] = useState('')
   const [emailSubmitted, setEmailSubmitted] = useState(false)
+  const [searchParams] = useSearchParams()
+  const { setAuth } = useAuth()
+
+  // Handle successful payment redirect
+  useEffect(() => {
+    const payment = searchParams.get('payment')
+    const tier = searchParams.get('tier')
+    const email = searchParams.get('email')
+    if (payment === 'success' && tier) {
+      setAuth(email || '', tier as 'report' | 'season' | 'premium')
+    }
+  }, [searchParams])
 
   const question = questions[step]
   const isLast = step === questions.length - 1
@@ -452,6 +466,8 @@ function ResultsScreen({
   answers: Record<string, unknown>
   setSubmitted: (s: boolean) => void
 }) {
+  const { isPaid, canExportPdf } = useAuth()
+
   function handleEmail(e: React.FormEvent) {
     e.preventDefault()
     if (!email) return
@@ -590,22 +606,58 @@ function ResultsScreen({
           transition={{ delay: 0.3 }}
           className="bg-white rounded-2xl p-8 shadow-sm mb-6 border border-gray-100"
         >
-          <h2 className="font-serif text-xl font-bold text-navy mb-6">Your Top 3 Matches</h2>
+          <h2 className="font-serif text-xl font-bold text-navy mb-6">
+            {isPaid ? `Your Top ${result.top_matches.length} Matches` : 'Your Top 3 Matches'}
+          </h2>
           <div className="space-y-4">
-            {result.top_matches.map((match: any, i: number) => (
+            {(isPaid ? result.top_matches : result.top_matches.slice(0, 3)).map((match: any, i: number) => (
               <SchoolCard key={match.school.name} match={match} index={i} getCategoryLabel={getCategoryLabel} getCategoryColor={getCategoryColor} />
             ))}
           </div>
 
+          {/* Locked matches teaser for free users */}
+          {!isPaid && result.top_matches.length > 3 && (
+            <div className="mt-4 relative">
+              <div className="blur-sm pointer-events-none select-none space-y-3">
+                {result.top_matches.slice(3, 5).map((match: any) => (
+                  <div key={match.school.name} className="p-4 rounded-xl bg-warm-gray">
+                    <h4 className="font-bold text-navy">{match.school.name}</h4>
+                    <p className="text-sm text-text-light">{match.match_score}% match</p>
+                  </div>
+                ))}
+              </div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Link
+                  to="/#pricing"
+                  className="bg-white/90 backdrop-blur-sm rounded-xl px-6 py-4 shadow-lg text-center border border-gray-100 no-underline"
+                >
+                  <Lock className="w-6 h-6 text-navy mx-auto mb-2" />
+                  <p className="font-bold text-navy text-sm">Unlock All {result.top_matches.length} Matches</p>
+                  <p className="text-xs text-text-light">Upgrade to see your full report</p>
+                </Link>
+              </div>
+            </div>
+          )}
+
           {/* PDF Download */}
           <div className="mt-6 text-center">
-            <button
-              onClick={handleDownloadPdf}
-              disabled={pdfLoading}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gold to-gold-dark hover:from-gold-dark hover:to-gold text-white font-semibold rounded-lg transition-all cursor-pointer border-0 text-sm disabled:opacity-50"
-            >
-              {pdfLoading ? 'Generating...' : 'Download PDF Report'}
-            </button>
+            {canExportPdf ? (
+              <button
+                onClick={handleDownloadPdf}
+                disabled={pdfLoading}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gold to-gold-dark hover:from-gold-dark hover:to-gold text-white font-semibold rounded-lg transition-all cursor-pointer border-0 text-sm disabled:opacity-50"
+              >
+                {pdfLoading ? 'Generating...' : 'Download PDF Report'}
+              </button>
+            ) : (
+              <Link
+                to="/#pricing"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-navy/10 text-navy font-semibold rounded-lg text-sm no-underline hover:bg-navy/20 transition-colors"
+              >
+                <Lock className="w-4 h-4" />
+                Upgrade to Download PDF
+              </Link>
+            )}
           </div>
 
           {/* Blurred teaser */}
@@ -664,6 +716,25 @@ function ResultsScreen({
               </button>
             </form>
           )}
+        </motion.div>
+
+        {/* Chat with AI Advisor */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 text-center mt-6"
+        >
+          <MessageCircle className="w-8 h-8 text-gold mx-auto mb-2" />
+          <h3 className="font-serif text-lg font-bold text-navy mb-1">Chat with AI Advisor</h3>
+          <p className="text-sm text-text-light mb-4">Get personalized advice about your matches, applications, and more.</p>
+          <Link
+            to={`/chat?context=${encodeURIComponent(JSON.stringify({ matches: result.top_matches.slice(0, 5).map((m: any) => ({ school: { name: m.school.name }, match_score: m.match_score, category: m.category, reason: m.reason })) }))}`}
+            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-gold to-gold-dark hover:from-gold-dark hover:to-gold text-white font-semibold rounded-lg transition-all no-underline text-sm"
+          >
+            <MessageCircle className="w-4 h-4" />
+            Start Chatting
+          </Link>
         </motion.div>
 
         {/* Social share + retake */}
