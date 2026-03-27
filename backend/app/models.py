@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, Float, Boolean, Text, ARRAY, DateTime, JSON
+from sqlalchemy import Column, Integer, String, Float, Boolean, Text, ARRAY, DateTime, JSON, ForeignKey
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from .database import Base
 
 
@@ -179,3 +180,35 @@ class DecisionResult(Base):
     email = Column(String(255), index=True)
     decision_data = Column(JSONB)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    password_hash = Column(String(255), nullable=False)
+    tier = Column(String(20), nullable=False, default="free")  # free/report/season/premium
+    is_verified = Column(Boolean, default=False)
+    verification_token = Column(String(255))
+    reset_token = Column(String(255))
+    reset_token_expires = Column(DateTime(timezone=True))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    last_login = Column(DateTime(timezone=True))
+    stripe_customer_id = Column(String(255))
+    stripe_subscription_id = Column(String(255))
+
+    saved_schools = relationship("SavedSchool", back_populates="user", cascade="all, delete-orphan")
+
+
+class SavedSchool(Base):
+    __tablename__ = "saved_schools"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    school_id = Column(Integer, ForeignKey("schools.id", ondelete="CASCADE"), nullable=False, index=True)
+    notes = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User", back_populates="saved_schools")
+    school = relationship("School")

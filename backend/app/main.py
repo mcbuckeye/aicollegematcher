@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import schools, assessment, leads, analytics, report, payments, chat, essay, financial_aid, strategy, decision, parent, majors
+from .routers import schools, assessment, leads, analytics, report, payments, chat, essay, financial_aid, strategy, decision, parent, majors, auth, saved_schools
 from .database import engine, Base
 
 # Create database tables
@@ -19,7 +19,8 @@ app.add_middleware(
         "http://localhost:5173",
         "http://127.0.0.1:5173",
         "http://localhost:5176",
-        "http://127.0.0.1:5176"
+        "http://127.0.0.1:5176",
+        "https://aicollegematcher.machomelab.com",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -40,6 +41,8 @@ app.include_router(strategy.router)
 app.include_router(decision.router)
 app.include_router(parent.router)
 app.include_router(majors.router)
+app.include_router(auth.router)
+app.include_router(saved_schools.router)
 
 
 @app.get("/api/health")

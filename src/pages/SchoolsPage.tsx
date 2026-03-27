@@ -1,15 +1,20 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { listSchools, type School } from '../services/api';
+import { Bookmark } from 'lucide-react';
+import { listSchools, saveSchool, removeSavedSchool, getSavedSchoolIds, type School } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
 export default function SchoolsPage() {
+  const { user, token } = useAuth();
+  const navigate = useNavigate();
   const [schools, setSchools] = useState<School[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [savedIds, setSavedIds] = useState<Set<number>>(new Set());
   
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -25,6 +30,30 @@ export default function SchoolsPage() {
   useEffect(() => {
     loadSchools();
   }, [searchQuery, stateFilter, typeFilter, regionFilter, sizeFilter, page]);
+
+  useEffect(() => {
+    if (user && token) {
+      getSavedSchoolIds(token).then(setSavedIds).catch(() => {});
+    }
+  }, [user, token]);
+
+  async function toggleSave(e: React.MouseEvent, schoolId: number) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user || !token) {
+      navigate('/login', { state: { from: '/schools' } });
+      return;
+    }
+    try {
+      if (savedIds.has(schoolId)) {
+        await removeSavedSchool(token, schoolId);
+        setSavedIds(prev => { const n = new Set(prev); n.delete(schoolId); return n; });
+      } else {
+        await saveSchool(token, schoolId);
+        setSavedIds(prev => new Set(prev).add(schoolId));
+      }
+    } catch { /* ignore */ }
+  }
 
   async function loadSchools() {
     setLoading(true);
@@ -227,9 +256,16 @@ export default function SchoolsPage() {
                   <Link
                     key={school.id}
                     to={`/schools/${school.id}`}
-                    className="bg-white rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200 p-6 block no-underline text-inherit cursor-pointer"
+                    className="bg-white rounded-lg shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-200 p-6 block no-underline text-inherit cursor-pointer relative"
                   >
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">{school.name}</h3>
+                    <button
+                      onClick={(e) => toggleSave(e, school.id)}
+                      className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-navy/5 transition-colors z-10"
+                      title={savedIds.has(school.id) ? 'Remove from saved' : 'Save school'}
+                    >
+                      <Bookmark className={`w-5 h-5 ${savedIds.has(school.id) ? 'fill-gold text-gold' : 'text-gray-400'}`} />
+                    </button>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2 pr-8">{school.name}</h3>
                     <p className="text-gray-600 mb-4">
                       {school.city}, {school.state}
                     </p>

@@ -14,6 +14,8 @@ import ParentDashboardPage from './pages/ParentDashboardPage'
 import DecisionPage from './pages/DecisionPage'
 import MajorExplorerPage from './pages/MajorExplorerPage'
 import MajorDetailPage from './pages/MajorDetailPage'
+import AuthPage from './pages/AuthPage'
+import SavedSchoolsPage from './pages/SavedSchoolsPage'
 
 export default function App() {
   return (
@@ -34,6 +36,9 @@ export default function App() {
             <Route path="/compare" element={<ComparePage />} />
             <Route path="/parent-dashboard" element={<ParentDashboardPage />} />
             <Route path="/decide" element={<DecisionPage />} />
+            <Route path="/login" element={<AuthPage />} />
+            <Route path="/register" element={<AuthPage />} />
+            <Route path="/saved" element={<SavedSchoolsPage />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

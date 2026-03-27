@@ -152,3 +152,61 @@ class SchoolStats(BaseModel):
 
 class CompareRequest(BaseModel):
     school_ids: List[int]
+
+
+# --- Auth Schemas ---
+
+class RegisterRequest(BaseModel):
+    email: str
+    password: str
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: "UserResponse"
+
+class UserResponse(BaseModel):
+    id: int
+    email: str
+    tier: str
+    is_verified: bool
+
+    class Config:
+        from_attributes = True
+
+class ForgotPasswordRequest(BaseModel):
+    email: str
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    new_password: str
+
+class VerifyEmailRequest(BaseModel):
+    token: str
+
+class GoogleAuthRequest(BaseModel):
+    token: str
+
+class MessageResponse(BaseModel):
+    message: str
+
+
+# --- Saved Schools Schemas ---
+
+class SaveSchoolRequest(BaseModel):
+    school_id: int
+    notes: Optional[str] = None
+
+class SavedSchoolResponse(BaseModel):
+    id: int
+    school_id: int
+    notes: Optional[str] = None
+    created_at: Optional[datetime] = None
+    school: SchoolResponse
+
+    class Config:
+        from_attributes = True

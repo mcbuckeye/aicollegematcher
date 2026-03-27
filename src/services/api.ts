@@ -319,3 +319,48 @@ export async function sendChatMessage(payload: {
   }
   return response.json()
 }
+
+
+// --- Saved Schools ---
+
+export interface SavedSchoolEntry {
+  id: number
+  school_id: number
+  notes: string | null
+  created_at: string | null
+  school: School
+}
+
+export async function getSavedSchools(token: string): Promise<SavedSchoolEntry[]> {
+  const response = await fetch(`${API_BASE_URL}/user/saved-schools`, {
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!response.ok) throw new Error('Failed to fetch saved schools')
+  return response.json()
+}
+
+export async function saveSchool(token: string, schoolId: number, notes?: string): Promise<SavedSchoolEntry> {
+  const response = await fetch(`${API_BASE_URL}/user/saved-schools`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ school_id: schoolId, notes }),
+  })
+  if (!response.ok) throw new Error('Failed to save school')
+  return response.json()
+}
+
+export async function removeSavedSchool(token: string, schoolId: number): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/user/saved-schools/${schoolId}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  })
+  if (!response.ok) throw new Error('Failed to remove saved school')
+}
+
+export async function getSavedSchoolIds(token: string): Promise<Set<number>> {
+  const saved = await getSavedSchools(token)
+  return new Set(saved.map(s => s.school_id))
+}

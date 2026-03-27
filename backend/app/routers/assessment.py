@@ -1,5 +1,5 @@
 import logging
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, BackgroundTasks
 from sqlalchemy.orm import Session
 from .. import schemas
 from ..database import get_db
@@ -13,6 +13,7 @@ router = APIRouter(prefix="/api/assessment", tags=["assessment"])
 @router.post("/match", response_model=schemas.AssessmentResult)
 def match_schools(
     assessment: schemas.AssessmentRequest,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db)
 ):
     """
@@ -102,4 +103,28 @@ def match_schools(
             db.rollback()
             logger.error(f"[LEAD] Failed to save lead {assessment.email}: {e}")
     
+    # Send assessment results email in background
+    if assessment.email and results.get('top_matches'):
+        try:
+            from ..services.email_service import send_assessment_results_email
+            matches_for_email = []
+            for m in results['top_matches'][:3]:
+                school = m['school']
+                matches_for_email.append({
+                    'school': {
+                        'name': school.name,
+                        'city': school.city,
+                        'state': school.state,
+                    },
+                    'match_score': m['match_score'],
+                })
+            background_tasks.add_task(
+                send_assessment_results_email,
+                assessment.email,
+                results['readiness_score'],
+                matches_for_email,
+            )
+        except Exception as e:
+            logger.warning(f"Failed to queue assessment results email: {e}")
+
     return results

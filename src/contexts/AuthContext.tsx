@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || (
   import.meta.env.PROD ? '/api' : 'http://localhost:8002/api'
@@ -6,70 +6,130 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || (
 
 type Tier = 'free' | 'report' | 'season' | 'premium'
 
-interface AuthState {
-  email: string | null
+interface UserData {
+  id: number
+  email: string
   tier: Tier
+  is_verified: boolean
 }
 
-interface AuthContextType extends AuthState {
-  setAuth: (email: string, tier: Tier) => void
-  clearAuth: () => void
+interface AuthContextType {
+  user: UserData | null
+  token: string | null
+  email: string | null
+  tier: Tier
   isPaid: boolean
   canExportPdf: boolean
   chatLimit: number | null
+  loading: boolean
+  login: (email: string, password: string) => Promise<void>
+  register: (email: string, password: string) => Promise<void>
+  logout: () => void
+  setAuth: (email: string, tier: Tier) => void
+  clearAuth: () => void
 }
 
 const AuthContext = createContext<AuthContextType>({
+  user: null,
+  token: null,
   email: null,
   tier: 'free',
-  setAuth: () => {},
-  clearAuth: () => {},
   isPaid: false,
   canExportPdf: false,
   chatLimit: 3,
+  loading: true,
+  login: async () => {},
+  register: async () => {},
+  logout: () => {},
+  setAuth: () => {},
+  clearAuth: () => {},
 })
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [auth, setAuthState] = useState<AuthState>(() => {
-    const saved = localStorage.getItem('acm_auth')
-    if (saved) {
-      try {
-        return JSON.parse(saved)
-      } catch {
-        return { email: null, tier: 'free' as Tier }
-      }
-    }
-    return { email: null, tier: 'free' as Tier }
-  })
+  const [user, setUser] = useState<UserData | null>(null)
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem('acm_token'))
+  const [loading, setLoading] = useState(true)
 
+  // On mount, verify stored token
   useEffect(() => {
-    if (auth.email) {
-      fetch(`${API_BASE_URL}/payments/status?email=${encodeURIComponent(auth.email)}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.tier && data.tier !== auth.tier) {
-            const updated = { email: auth.email, tier: data.tier as Tier }
-            setAuthState(updated)
-            localStorage.setItem('acm_auth', JSON.stringify(updated))
-          }
-        })
-        .catch(() => {})
+    if (!token) {
+      setLoading(false)
+      return
     }
-  }, [auth.email])
 
-  function setAuth(email: string, tier: Tier) {
-    const state = { email, tier }
-    setAuthState(state)
-    localStorage.setItem('acm_auth', JSON.stringify(state))
-  }
+    fetch(`${API_BASE_URL}/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Invalid token')
+        return res.json()
+      })
+      .then((data: UserData) => {
+        setUser(data)
+      })
+      .catch(() => {
+        // Token invalid — clear it
+        localStorage.removeItem('acm_token')
+        localStorage.removeItem('acm_auth')
+        setToken(null)
+        setUser(null)
+      })
+      .finally(() => setLoading(false))
+  }, [])
 
-  function clearAuth() {
-    setAuthState({ email: null, tier: 'free' })
+  const login = useCallback(async (email: string, password: string) => {
+    const res = await fetch(`${API_BASE_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    })
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      throw new Error(data.detail || 'Login failed')
+    }
+    const data = await res.json()
+    localStorage.setItem('acm_token', data.access_token)
+    localStorage.setItem('acm_auth', JSON.stringify({ email: data.user.email, tier: data.user.tier }))
+    setToken(data.access_token)
+    setUser(data.user)
+  }, [])
+
+  const register = useCallback(async (email: string, password: string) => {
+    const res = await fetch(`${API_BASE_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    })
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      throw new Error(data.detail || 'Registration failed')
+    }
+    const data = await res.json()
+    localStorage.setItem('acm_token', data.access_token)
+    localStorage.setItem('acm_auth', JSON.stringify({ email: data.user.email, tier: data.user.tier }))
+    setToken(data.access_token)
+    setUser(data.user)
+  }, [])
+
+  const logout = useCallback(() => {
+    localStorage.removeItem('acm_token')
     localStorage.removeItem('acm_auth')
-  }
+    setToken(null)
+    setUser(null)
+  }, [])
 
-  const isPaid = auth.tier !== 'free'
-  const canExportPdf = ['report', 'season', 'premium'].includes(auth.tier)
+  // Legacy compat for existing code that uses setAuth/clearAuth
+  const setAuth = useCallback((email: string, tier: Tier) => {
+    localStorage.setItem('acm_auth', JSON.stringify({ email, tier }))
+  }, [])
+
+  const clearAuth = useCallback(() => {
+    logout()
+  }, [logout])
+
+  const tier: Tier = (user?.tier as Tier) || 'free'
+  const isPaid = tier !== 'free'
+  const canExportPdf = ['report', 'season', 'premium'].includes(tier)
   const chatLimits: Record<Tier, number | null> = {
     free: 3,
     report: 20,
@@ -80,12 +140,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider
       value={{
-        ...auth,
-        setAuth,
-        clearAuth,
+        user,
+        token,
+        email: user?.email || null,
+        tier,
         isPaid,
         canExportPdf,
-        chatLimit: chatLimits[auth.tier],
+        chatLimit: chatLimits[tier],
+        loading,
+        login,
+        register,
+        logout,
+        setAuth,
+        clearAuth,
       }}
     >
       {children}

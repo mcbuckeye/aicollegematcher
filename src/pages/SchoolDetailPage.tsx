@@ -13,10 +13,12 @@ import {
   BarChart3,
   Heart,
   Building2,
+  Bookmark,
 } from 'lucide-react'
 import { Helmet } from 'react-helmet-async'
-import { getSchool, type School } from '../services/api'
+import { getSchool, saveSchool, removeSavedSchool, getSavedSchoolIds, type School } from '../services/api'
 import { trackEvent } from '../services/analytics'
+import { useAuth } from '../contexts/AuthContext'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
@@ -114,9 +116,11 @@ const PROGRAM_LABELS: Record<string, string> = {
 export default function SchoolDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { user, token } = useAuth()
   const [school, setSchool] = useState<School | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isSaved, setIsSaved] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -129,6 +133,28 @@ export default function SchoolDetailPage() {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false))
   }, [id])
+
+  useEffect(() => {
+    if (user && token && id) {
+      getSavedSchoolIds(token).then(ids => setIsSaved(ids.has(Number(id)))).catch(() => {})
+    }
+  }, [user, token, id])
+
+  async function toggleSave() {
+    if (!user || !token) {
+      navigate('/login', { state: { from: `/schools/${id}` } })
+      return
+    }
+    try {
+      if (isSaved) {
+        await removeSavedSchool(token, Number(id))
+        setIsSaved(false)
+      } else {
+        await saveSchool(token, Number(id))
+        setIsSaved(true)
+      }
+    } catch { /* ignore */ }
+  }
 
   if (loading) {
     return (
@@ -216,16 +242,29 @@ export default function SchoolDetailPage() {
                 </div>
               </div>
 
-              {school.school_url && (
-                <a
-                  href={school.school_url.startsWith('http') ? school.school_url : `https://${school.school_url}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-gold hover:bg-gold-light text-navy-dark font-semibold rounded-lg transition-colors text-sm no-underline"
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={toggleSave}
+                  className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg transition-colors text-sm font-semibold ${
+                    isSaved
+                      ? 'bg-gold text-navy-dark hover:bg-gold-light'
+                      : 'bg-white/15 text-white hover:bg-white/25'
+                  }`}
                 >
-                  Visit Website <ExternalLink className="w-4 h-4" />
-                </a>
-              )}
+                  <Bookmark className={`w-4 h-4 ${isSaved ? 'fill-navy-dark' : ''}`} />
+                  {isSaved ? 'Saved' : 'Save School'}
+                </button>
+                {school.school_url && (
+                  <a
+                    href={school.school_url.startsWith('http') ? school.school_url : `https://${school.school_url}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-gold hover:bg-gold-light text-navy-dark font-semibold rounded-lg transition-colors text-sm no-underline"
+                  >
+                    Visit Website <ExternalLink className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         </div>
