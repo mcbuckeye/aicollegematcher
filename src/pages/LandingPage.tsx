@@ -563,7 +563,7 @@ export default function LandingPage() {
             {[
               {
                 icon: Search,
-                title: '150+ Schools Analyzed',
+                title: '2,000+ Schools Analyzed',
                 desc: 'Our database covers Ivies, flagships, HBCUs, hidden gems, military academies, and everything in between — with real stats on every one.',
               },
               {
