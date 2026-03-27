@@ -64,6 +64,16 @@ def match_schools(
             "latitude": school.latitude,
             "longitude": school.longitude,
             "description": school.description,
+            # Extended fields for richer match reasons
+            "avg_net_price": school.avg_net_price,
+            "cost_of_attendance": school.cost_of_attendance,
+            "pell_grant_rate": school.pell_grant_rate,
+            "median_debt": school.median_debt,
+            "earnings_6yr_after_entry": school.earnings_6yr_after_entry,
+            "earnings_8yr_after_entry": school.earnings_8yr_after_entry,
+            "completion_rate_4yr_100": school.completion_rate_4yr_100,
+            "first_generation_rate": school.first_generation_rate,
+            "programs_offered": school.programs_offered,
         }
         school_dicts.append(school_dict)
     
