@@ -17,6 +17,8 @@ import MajorDetailPage from './pages/MajorDetailPage'
 import AuthPage from './pages/AuthPage'
 import SavedSchoolsPage from './pages/SavedSchoolsPage'
 import AdminPage from './pages/AdminPage'
+import BlogIndexPage from './pages/BlogIndexPage'
+import BlogPostPage from './pages/BlogPostPage'
 
 export default function App() {
   return (
@@ -41,6 +43,8 @@ export default function App() {
             <Route path="/register" element={<AuthPage />} />
             <Route path="/saved" element={<SavedSchoolsPage />} />
             <Route path="/admin" element={<AdminPage />} />
+            <Route path="/blog" element={<BlogIndexPage />} />
+            <Route path="/blog/:slug" element={<BlogPostPage />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

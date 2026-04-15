@@ -59,6 +59,7 @@ export default function Navbar() {
             <a href="#how-it-works" className="text-sm text-text-light hover:text-navy transition-colors no-underline">How It Works</a>
             <a href="#features" className="text-sm text-text-light hover:text-navy transition-colors no-underline">Features</a>
             <Link to="/schools" className="text-sm text-text-light hover:text-navy transition-colors no-underline">Browse Schools</Link>
+            <Link to="/blog" className="text-sm text-text-light hover:text-navy transition-colors no-underline">Blog</Link>
             <Link to="/majors" className="text-sm text-text-light hover:text-navy transition-colors no-underline inline-flex items-center gap-1">
               <Microscope className="w-3.5 h-3.5" />
               Explore Majors
@@ -124,6 +125,7 @@ export default function Navbar() {
         {!isHome && (
           <div className="hidden md:flex items-center gap-4">
             <Link to="/schools" className="text-sm text-text-light hover:text-navy transition-colors no-underline">Browse Schools</Link>
+            <Link to="/blog" className="text-sm text-text-light hover:text-navy transition-colors no-underline">Blog</Link>
             <Link to="/majors" className="text-sm text-text-light hover:text-navy transition-colors no-underline inline-flex items-center gap-1">
               <Microscope className="w-3.5 h-3.5" />
               Explore Majors
@@ -227,6 +229,7 @@ export default function Navbar() {
                 </>
               )}
               <Link to="/schools" onClick={() => setOpen(false)} className="text-text-light hover:text-navy transition-colors no-underline">Browse Schools</Link>
+              <Link to="/blog" onClick={() => setOpen(false)} className="text-text-light hover:text-navy transition-colors no-underline">Blog</Link>
               <Link to="/majors" onClick={() => setOpen(false)} className="text-text-light hover:text-navy transition-colors no-underline flex items-center gap-1">
                 <Microscope className="w-3.5 h-3.5" />
                 Explore Majors
